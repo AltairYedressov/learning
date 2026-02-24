@@ -29,7 +29,7 @@ jobs:
     defaults:
       run:
         # working-directory relative to repo root
-        working-directory: terraform-infra/root/${{ env.ENVIRONMENT_STAGE }}/${{ matrix.stack }}
+        working-directory: ./terraform-infra/root/${{ env.ENVIRONMENT_STAGE }}/${{ matrix.stack }}
         shell: bash
 
     steps:
