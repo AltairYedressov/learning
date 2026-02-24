@@ -28,10 +28,8 @@ jobs:
 
     defaults:
       run:
-        working-directory: terraform-infra/root/dev/${{ matrix.stack }}
+        working-directory: terraform-infra/root/${ENVIRONMENT_STAGE}/${{ matrix.stack }}
         shell: bash
-
-    environment: dev
 
     steps:
       - name: Checkout Repository
@@ -66,8 +64,8 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -input=false -var-file=${ENVIRONMENT_STAGE}.tfvars
+        run: terraform plan -input=false
 
       - name: Terraform Apply (only on main)
         if: github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve -input=false -var-file=${ENVIRONMENT_STAGE}.tfvars
+        run: terraform apply -auto-approve -input=false
