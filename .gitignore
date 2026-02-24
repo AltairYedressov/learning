@@ -1,0 +1,19 @@
+# Local .terraform directories
+**/.terraform/
+
+# Terraform state files (local)
+**/*.tfstate
+**/*.tfstate.*
+/terraform-infra/root/dev/bootstrap/*.tfvars
+**/*.lock*
+
+# Crash logs
+crash.log
+
+# Ignore override files, but not main code
+override.tf
+override.tf.json
+*.auto.tfvars
+
+# Ignore plan output
+*.plan
