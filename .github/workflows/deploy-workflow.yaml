@@ -24,7 +24,7 @@ jobs:
 
     strategy:
       matrix:
-        stack: [networking, eks, s3]
+        stack: [networking]
 
     defaults:
       run:
