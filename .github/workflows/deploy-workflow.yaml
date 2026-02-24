@@ -71,9 +71,9 @@ jobs:
 
       # 7️⃣ Terraform Plan
       - name: Terraform Plan
-        run: terraform plan -input=false -var-file=${{ env.ENVIRONMENT_STAGE }}.tfvars
+        run: terraform plan -input=false
 
       # 8️⃣ Terraform Apply (only on main branch)
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve -input=false -var-file=${{ env.ENVIRONMENT_STAGE }}.tfvars
+        run: terraform apply -auto-approve -input=false 
