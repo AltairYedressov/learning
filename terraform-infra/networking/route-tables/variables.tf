@@ -19,3 +19,7 @@ variable "subnets" {
     public            = bool
   }))
 }
+
+variable "environment" {
+  type = string
+}
