@@ -9,13 +9,13 @@ variable "vpc_id" {
 }
 
 variable "description" {
-  type        = string
-  default     = "Managed by Terraform"
+  type    = string
+  default = "Managed by Terraform"
 }
 
 variable "tags" {
-  type        = map(string)
-  default     = {}
+  type    = map(string)
+  default = {}
 }
 
 variable "rules" {

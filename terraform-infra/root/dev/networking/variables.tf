@@ -18,7 +18,7 @@ variable "subnets" {
   }))
 }
 variable "protocol" {
-  type = string
+  type    = string
   default = "tcp"
-  
+
 }

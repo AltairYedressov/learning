@@ -4,7 +4,7 @@ resource "aws_security_group" "sg" {
   vpc_id      = var.vpc_id
 
   tags = {
-    name = var.name
+    name        = var.name
     environment = var.environment
   }
 }
@@ -17,8 +17,8 @@ resource "aws_vpc_security_group_ingress_rule" "sg" {
   to_port           = each.value.to_port
   ip_protocol       = each.value.protocol
 
-   cidr_ipv4 = each.value.ip_version == "ipv4" ? each.value.cidr : null
-   cidr_ipv6 = each.value.ip_version == "ipv6" ? each.value.cidr : null
+  cidr_ipv4 = each.value.ip_version == "ipv4" ? each.value.cidr : null
+  cidr_ipv6 = each.value.ip_version == "ipv6" ? each.value.cidr : null
 }
 
 # Egress rules: allow all traffic (IPv4 + IPv6)
