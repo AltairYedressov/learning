@@ -28,31 +28,31 @@ module "route-tables" {
 }
 
 module "sg-cluster" {
-  source = "../../../networking/security-group"
-  vpc_id      = module.vpc.vpc_id
+  source              = "../../../networking/security-group"
+  vpc_id              = module.vpc.vpc_id
   security_group_name = "cluster-sg"
-  description_for_sg = "Security groups for cluster"
-  resource_name = "EKS-cluster"
-  environment = "dev"
-  vpc_cidr_ipv4 = module.vpc.cidr_block
-  vpc_cidr_ipv6 = module.vpc.ipv6_cidr_block 
-  from_port_ipv4 = "443"
-  to_port_ipv4 = "443"
-  to_port_ipv6 = "443"
-  from_port_ipv6 = "443"
+  description_for_sg  = "Security groups for cluster"
+  resource_name       = "EKS-cluster"
+  environment         = "dev"
+  vpc_cidr_ipv4       = module.vpc.cidr_block
+  vpc_cidr_ipv6       = module.vpc.ipv6_cidr_block
+  from_port_ipv4      = "443"
+  to_port_ipv4        = "443"
+  to_port_ipv6        = "443"
+  from_port_ipv6      = "443"
 }
 
 module "sg-worker-nodes" {
-  source = "../../../networking/security-group"
-  vpc_id      = module.vpc.vpc_id
+  source              = "../../../networking/security-group"
+  vpc_id              = module.vpc.vpc_id
   security_group_name = "sg-worker-nodes"
-  description_for_sg = "Security groups for worker nodes"
-  resource_name = "EKS-worker-nodes"
-  environment = "dev"
-  vpc_cidr_ipv4 = module.vpc.cidr_block
-  vpc_cidr_ipv6 = module.vpc.ipv6_cidr_block
-  from_port_ipv4 = "443"
-  to_port_ipv4 = "443"
-  to_port_ipv6 = "443"
-  from_port_ipv6 = "443"
+  description_for_sg  = "Security groups for worker nodes"
+  resource_name       = "EKS-worker-nodes"
+  environment         = "dev"
+  vpc_cidr_ipv4       = module.vpc.cidr_block
+  vpc_cidr_ipv6       = module.vpc.ipv6_cidr_block
+  from_port_ipv4      = "443"
+  to_port_ipv4        = "443"
+  to_port_ipv6        = "443"
+  from_port_ipv6      = "443"
 }

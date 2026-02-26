@@ -43,11 +43,11 @@ variable "from_port_ipv6" {
 }
 
 variable "ip_protocol_ipv4" {
-  type = string
+  type    = string
   default = "tcp"
 }
 
 variable "ip_protocol_ipv6" {
-  type = string
+  type    = string
   default = "tcp"
 }
