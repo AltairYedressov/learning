@@ -4,7 +4,7 @@ resource "aws_security_group" "allow_tls" {
   vpc_id      = var.vpc_id
 
   tags = {
-    Name = "sg-${var.resource_name}-${var.environment}"
+    Name = "SecurityGroup-${var.resource_name}-${var.environment}"
   }
 }
 
