@@ -41,3 +41,11 @@ module "cluster-sg" {
     }
   ]
 }
+
+module "worker-nodes-sg" {
+  source      = "../../../networking/security-group"
+  name        = "cluster-sg"
+  description = "Scurity Group for cluste"
+  vpc_id      = module.vpc.vpc_id
+  environment = var.environment
+}
