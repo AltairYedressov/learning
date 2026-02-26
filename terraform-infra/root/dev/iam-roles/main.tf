@@ -17,7 +17,7 @@ module "eks_worker_nodes" {
   environment = var.environment
 
   principal_type        = "Service"
-  principal_identifiers = ["eks.amazonaws.com"]
+  principal_identifiers = ["ec2.amazonaws.com"]
 
   aws_managed_policy_arns = var.eks_worker_nodes_policy
 }
