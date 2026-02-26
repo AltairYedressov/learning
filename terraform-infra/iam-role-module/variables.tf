@@ -43,5 +43,5 @@ variable "aws_managed_policy_arns" {
 variable "permissions_boundary_arn" {
   description = "Optional permissions boundary ARN"
   type        = string
-  default     = null
+  default     = "arn:aws:iam::372517046622:policy/TerraformPermissionBoundary"
 }
