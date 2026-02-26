@@ -26,3 +26,18 @@ module "route-tables" {
   subnet_ids  = module.subnets.subnet_ids
   environment = var.environment
 }
+
+module "cluster-sg" {
+  source      = "../../../networking/security-group"
+  name        = "cluster-sg"
+  description = "Scurity Group for cluste"
+  vpc_id      = module.vpc.vpc_id
+  environment = var.environment
+  rules = [
+    {
+      cidr      = module.vpc.cidr_block
+      from_port = 443
+      to_port   = 443
+    }
+  ]
+}
