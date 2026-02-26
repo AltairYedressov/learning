@@ -26,6 +26,7 @@ variable "rules" {
     protocol   = optional(string, "tcp")
     ip_version = optional(string, "ipv4")
   }))
+  default = []
 }
 
 variable "environment" {
