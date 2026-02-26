@@ -64,7 +64,7 @@ resource "aws_security_group_rule" "internal_kubelet_access" {
   from_port         = 10250
   to_port           = 10250
   protocol          = "tcp"
-  cidr_blocks       = mopule.vpc.cidr_block
+  cidr_blocks       = module.vpc.cidr_block
   security_group_id = module.worker-nodes-sg.security_group_id
   description       = "Allow access to kubelet from within the VPC (for Prometheus, Metrics Server, etc.)"
 }
