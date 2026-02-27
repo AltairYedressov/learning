@@ -23,6 +23,6 @@ variable "eks_worker_nodes_policy" {
 }
 
 variable "ebs_csi_irsa_role" {
-  type = string
+  type    = string
   default = "ebs-csi-irsa-role"
 }
