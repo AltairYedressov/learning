@@ -11,7 +11,7 @@ resource "aws_eks_cluster" "projectx_cluster" {
   vpc_config {
     endpoint_public_access = true
     subnet_ids             = data.aws_subnets.public.ids
-    security_group_ids     = [data.aws_security_group.cluster-sg.security_group_id]
+    security_group_ids     = [data.aws_security_group.cluster_sg.security_group_id]
   }
 
   tags = {
