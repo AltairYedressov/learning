@@ -7,35 +7,41 @@ subnets = {
     cidr_block        = "10.0.1.0/24"
     availability_zone = "us-east-1a"
     public            = true
+    Type              = public
   }
 
   public-2 = {
     cidr_block        = "10.0.2.0/24"
     availability_zone = "us-east-1b"
     public            = true
+    Type              = public
   }
 
   public-3 = {
     cidr_block        = "10.0.3.0/24"
     availability_zone = "us-east-1c"
     public            = true
+    Type              = private
   }
 
   private-1 = {
     cidr_block        = "10.0.4.0/24"
     availability_zone = "us-east-1a"
     public            = false
+    Type              = private
   }
 
   private-2 = {
     cidr_block        = "10.0.5.0/24"
     availability_zone = "us-east-1b"
     public            = false
+    Type              = private
   }
 
   private-3 = {
     cidr_block        = "10.0.6.0/24"
     availability_zone = "us-east-1c"
     public            = false
+    Type              = private
   }
 }
