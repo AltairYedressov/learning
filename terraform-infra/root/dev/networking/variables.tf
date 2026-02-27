@@ -17,3 +17,8 @@ variable "subnets" {
     public            = bool
   }))
 }
+variable "protocol" {
+  type    = string
+  default = "tcp"
+
+}
