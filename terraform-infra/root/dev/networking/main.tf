@@ -51,7 +51,7 @@ module "worker-nodes-sg" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_workers" {
-  security_group_id            = module.worker-nodes-sg.security_group_id
+  security_group_id            = module.cluster-sg.security_group_id
   referenced_security_group_id = module.worker-nodes-sg.security_group_id
   ip_protocol                  = "-1"
   from_port                    = 0
