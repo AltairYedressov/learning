@@ -1,7 +1,3 @@
-data "aws_iam_role" "eks_worker_nodes_role" {
-  name = "eks_worker_nodes_role"
-}
-
 resource "aws_eks_access_entry" "nodes_entry" {
   cluster_name  = aws_eks_cluster.projectx_cluster.name
   principal_arn = data.aws_iam_role.eks_worker_nodes_role.arn

@@ -1,19 +1,3 @@
-data "aws_vpc" "projectx" {
-  cidr_block = var.vpc_cidr
-}
-
-data "aws_subnets" "public" {
-  filter {
-    name   = "tag:Type"
-    values = ["public"]
-  }
-
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.projectx.id]
-  }
-}
-
 resource "aws_autoscaling_group" "workers_asg" {
   name                = "${var.cluster_name}-workers-asg"
   min_size            = var.min_size

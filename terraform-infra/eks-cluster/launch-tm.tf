@@ -1,27 +1,3 @@
-data "aws_ssm_parameter" "eks_worker_ami" {
-  name = "/aws/service/eks/optimized-ami/${var.k8s_version}/amazon-linux-2023/x86_64/standard/recommended/image_id"
-}
-
-data "aws_vpc" "projectx" {
-  cidr_block = var.vpc_cidr
-}
-
-data "aws_security_group" "worker_nodes_sg" {
-  filter {
-    name   = "group-name"
-    values = ["worker-nodes-sg"]
-  }
-
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.projectx.id]
-  }
-}
-
-data "aws_iam_role" "eks_worker_nodes_role" {
-  name = "eks_worker_nodes_role"
-}
-
 resource "aws_iam_instance_profile" "workers_instance_profile" {
   name = "${var.cluster_name}-workers-instance-profile"
   role = data.aws_iam_role.eks_worker_nodes_role.name

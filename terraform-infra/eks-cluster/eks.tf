@@ -1,31 +1,3 @@
-data "aws_security_group" "cluster_sg" {
-  filter {
-    name   = "group-name"
-    values = ["cluster-sg"]
-  }
-
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.projectx.id]
-  }
-}
-
-data "aws_vpc" "projectx" {
-  cidr_block = var.vpc_cidr
-}
-
-data "aws_subnets" "public" {
-  filter {
-    name   = "tag:Type"
-    values = ["public"]
-  }
-
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.projectx.id]
-  }
-}
-
 resource "aws_eks_cluster" "projectx_cluster" {
   name                      = var.cluster_name
   version                   = var.k8s_version
