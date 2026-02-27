@@ -50,11 +50,15 @@ module "worker-nodes-sg" {
   environment = var.environment
 }
 
-resource "aws_vpc_security_group_ingress_rule" "workers_to_workers" {
-  security_group_id            = module.worker-nodes-sg.security_group_id
+resource "aws_vpc_security_group_ingress_rule" "cluster_from_workers" {
+  security_group_id            = module.cluster-sg.security_group_id
   referenced_security_group_id = module.worker-nodes-sg.security_group_id
-  ip_protocol                  = "-1"
-  description                  = "Allow all traffic from worker nodes to each other"
+
+  ip_protocol = "tcp"
+  from_port   = 443
+  to_port     = 443
+
+  description = "Workers to EKS API"
 }
 
 resource "aws_security_group_rule" "internal_kubelet_access" {
