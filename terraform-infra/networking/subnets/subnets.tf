@@ -10,6 +10,6 @@ resource "aws_subnet" "subnets" {
   tags = {
     Name        = each.key
     Environment = var.environment
-    Type        = each.value.public ? "public" : "private"
+
   }
 }

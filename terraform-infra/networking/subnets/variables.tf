@@ -12,5 +12,6 @@ variable "subnets" {
     cidr_block        = string
     availability_zone = string
     public            = bool
+    Type              = each.value.public ? "public" : "private"
   }))
 }
