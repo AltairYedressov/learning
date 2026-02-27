@@ -45,3 +45,7 @@ data "aws_security_group" "cluster_sg" {
 data "aws_iam_role" "eks_worker_nodes_role" {
   name = "eks_worker_nodes_role"
 }
+
+data "aws_iam_role" "eks_cluster_role" {
+  name = "eks_cluster_role"
+}
