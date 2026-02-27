@@ -1,7 +1,7 @@
 resource "aws_eks_cluster" "projectx_cluster" {
   name                      = var.cluster_name
   version                   = var.k8s_version
-  role_arn                  = data.aws_security_group.cluster_sg.arn
+  role_arn                  = data.aws_iam_role.eks_cluster_role.arn
   enabled_cluster_log_types = ["api", "audit"]
 
   access_config {
