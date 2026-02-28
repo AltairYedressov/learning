@@ -22,27 +22,27 @@ module "eks_worker_nodes" {
   aws_managed_policy_arns = var.eks_worker_nodes_policy
 }
 
-# module "ebs_csi_irsa_role" {
-#   source = "../../../iam-role-module"
+module "ebs_csi_irsa_role" {
+  source = "../../../iam-role-module"
 
-#   role_name   = var.ebs_csi_irsa_role
-#   environment = var.environment
+  role_name   = var.ebs_csi_irsa_role
+  environment = var.environment
 
-#   principal_type = "Federated"
+  principal_type = "Federated"
 
-#   principal_identifiers = [
-#     aws_iam_openid_connect_provider.eks_oidc_provider.arn
-#   ]
+  principal_identifiers = [
+    aws_iam_openid_connect_provider.eks_oidc_provider.arn
+  ]
 
-#   assume_role_conditions = [
-#     {
-#       test     = "StringEquals"
-#       variable = "${replace(aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:sub"
-#       values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
-#     }
-#   ]
+  assume_role_conditions = [
+    {
+      test     = "StringEquals"
+      variable = "${replace(aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+    }
+  ]
 
-#   aws_managed_policy_arns = [
-#     "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
-#   ]
-# }
+  aws_managed_policy_arns = [
+    "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  ]
+}
