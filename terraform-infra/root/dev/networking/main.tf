@@ -80,3 +80,13 @@ resource "aws_security_group_rule" "allow_control_plane_to_kubelet" {
   source_security_group_id = module.cluster-sg.security_group_id
   description              = "Allow EKS control plane to communicate with kubelet on worker nodes (for exec/logs/health checks)"
 }
+
+resource "aws_security_group_rule" "worker_sg_self_reference_all" {
+  type                     = "ingress"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1" # all protocols
+  security_group_id        = module.worker-nodes-sg.security_group_id
+  source_security_group_id = module.worker-nodes-sg.security_group_id
+  description              = "Allow all traffic between worker nodes for pod networking and DNS"
+}
