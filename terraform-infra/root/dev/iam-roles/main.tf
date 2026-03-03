@@ -35,12 +35,12 @@ module "ebs_csi_irsa_role" {
   ]
 
   assume_role_conditions = {
-  ebs_csi_controller = {
-    test     = "StringEquals"
-    variable = "${replace(data.aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:sub"
-    values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+    ebs_csi_controller = {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
+    }
   }
-}
   aws_managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
   ]
