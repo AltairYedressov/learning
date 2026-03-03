@@ -14,8 +14,8 @@ module "eks_worker_nodes" {
   source = "../../../iam-role-module"
 
   assume_role_action = "sts:AssumeRoleWithWebIdentity"
-  role_name   = var.eks_worker_nodes_role
-  environment = var.environment
+  role_name          = var.eks_worker_nodes_role
+  environment        = var.environment
 
   principal_type        = "Service"
   principal_identifiers = ["ec2.amazonaws.com"]

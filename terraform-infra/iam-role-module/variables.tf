@@ -47,7 +47,7 @@ variable "permissions_boundary_arn" {
 }
 
 variable "assume_role_action" {
-  type = string
+  type    = string
   default = "sts:AssumeRole"
-  
+
 }
