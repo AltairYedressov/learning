@@ -37,7 +37,7 @@ module "ebs_csi_irsa_role" {
   assume_role_conditions = [
     {
       test     = "StringEquals"
-      variable = "${replace(aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:sub"
+      variable = "${replace(data.aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:sub"
       values   = ["system:serviceaccount:kube-system:ebs-csi-controller-sa"]
     }
   ]
