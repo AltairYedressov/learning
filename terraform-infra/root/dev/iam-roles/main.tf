@@ -13,6 +13,7 @@ module "eks_cluster" {
 module "eks_worker_nodes" {
   source = "../../../iam-role-module"
 
+  assume_role_action = "sts:AssumeRoleWithWebIdentity"
   role_name   = var.eks_worker_nodes_role
   environment = var.environment
 

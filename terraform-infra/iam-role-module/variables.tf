@@ -45,3 +45,9 @@ variable "permissions_boundary_arn" {
   type        = string
   default     = "arn:aws:iam::372517046622:policy/PermissionBoundary"
 }
+
+variable "assume_role_action" {
+  type = string
+  default = "sts:AssumeRole"
+  
+}

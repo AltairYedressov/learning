@@ -1,7 +1,7 @@
 data "aws_iam_policy_document" "assume_role" {
   statement {
     effect  = "Allow"
-    actions = ["sts:AssumeRoleWithWebIdentity"]
+    actions = [var.assume_role_action]
 
     principals {
       type        = var.principal_type
