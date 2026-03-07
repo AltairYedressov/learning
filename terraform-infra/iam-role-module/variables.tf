@@ -40,12 +40,6 @@ variable "aws_managed_policy_arns" {
   default     = []
 }
 
-variable "permissions_boundary_arn" {
-  description = "Optional permissions boundary ARN"
-  type        = string
-  default     = "arn:aws:iam::372517046622:policy/PermissionBoundary"
-}
-
 variable "assume_role_action" {
   type    = string
   default = "sts:AssumeRole"

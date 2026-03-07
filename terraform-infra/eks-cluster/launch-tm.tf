@@ -1,8 +1,3 @@
-resource "aws_iam_instance_profile" "workers_instance_profile" {
-  name = "${var.cluster_name}-workers-instance-profile"
-  role = data.aws_iam_role.eks_worker_nodes_role.name
-}
-
 resource "aws_launch_template" "workers_lt" {
   name                   = "${var.cluster_name}-workers-lt"
   image_id               = data.aws_ssm_parameter.eks_worker_ami.value
@@ -20,15 +15,10 @@ resource "aws_launch_template" "workers_lt" {
 #!/bin/bash
 set -e
 
-# Create folder for EKS CA
+# Create folder for EKS config
 mkdir -p /etc/eks
 
-# Write cluster CA to file (nodeadm expects a file for AL2023 AMIs)
-cat <<'EOF' > /etc/eks/ca.crt
-${aws_eks_cluster.projectx_cluster.certificate_authority[0].data}
-EOF
-
-# Create NodeConfig YAML for nodeadm
+# Write NodeConfig YAML for nodeadm
 cat <<'EOF' > /etc/eks/node-config.yaml
 apiVersion: node.eks.aws/v1alpha1
 kind: NodeConfig
@@ -36,7 +26,7 @@ spec:
   cluster:
     name: ${var.cluster_name}
     apiServerEndpoint: ${aws_eks_cluster.projectx_cluster.endpoint}
-    certificateAuthority: file:///etc/eks/ca.crt
+    certificateAuthority: ${replace(aws_eks_cluster.projectx_cluster.certificate_authority[0].data, "\n", "")}
     cidr: ${aws_eks_cluster.projectx_cluster.kubernetes_network_config[0].service_ipv4_cidr}
   kubelet:
     config:
