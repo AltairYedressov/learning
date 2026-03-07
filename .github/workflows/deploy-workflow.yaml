@@ -24,7 +24,7 @@ jobs:
 
     strategy:
       matrix:
-        stack: [networking, iam-roles, eks]
+        stack: [eks]
 
     defaults:
       run:
@@ -76,4 +76,4 @@ jobs:
       # 8️⃣ Terraform Apply (only on main branch)
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve -input=false 
+        run: terraform destroy -auto-approve -input=false 
