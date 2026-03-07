@@ -17,6 +17,7 @@ resource "aws_launch_template" "workers_lt" {
   }
 
   user_data = base64encode(<<-EOT
+Content-Type: application/node.eks.aws
 ---
 apiVersion: node.eks.aws/v1alpha1
 kind: NodeConfig
