@@ -12,9 +12,9 @@ module "eks_cluster" {
 
 module "eks_worker_nodes" {
   source = "../../../iam-role-module"
-  
-  role_name          = var.eks_worker_nodes_role
-  environment        = var.environment
+
+  role_name   = var.eks_worker_nodes_role
+  environment = var.environment
 
   principal_type        = "Service"
   principal_identifiers = ["ec2.amazonaws.com"]

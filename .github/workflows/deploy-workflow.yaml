@@ -24,7 +24,7 @@ jobs:
 
     strategy:
       matrix:
-        stack: [iam-roles, eks]
+        stack: [iam-roles]
 
     defaults:
       run:
