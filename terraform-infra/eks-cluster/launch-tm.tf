@@ -17,33 +17,22 @@ resource "aws_launch_template" "workers_lt" {
   }
 
   user_data = base64encode(<<-EOT
-#!/bin/bash
-set -e
-
-# Create folder for EKS config
-mkdir -p /etc/eks
-
-# Write NodeConfig YAML for nodeadm
-cat <<'EOF' > /etc/eks/node-config.yaml
+---
 apiVersion: node.eks.aws/v1alpha1
 kind: NodeConfig
 spec:
   cluster:
     name: ${var.cluster_name}
     apiServerEndpoint: ${aws_eks_cluster.projectx_cluster.endpoint}
-    certificateAuthority: ${replace(aws_eks_cluster.projectx_cluster.certificate_authority[0].data, "\n", "")}
+    certificateAuthority: ${aws_eks_cluster.projectx_cluster.certificate_authority[0].data}
     cidr: ${aws_eks_cluster.projectx_cluster.kubernetes_network_config[0].service_ipv4_cidr}
   kubelet:
     config:
       clusterDNS:
-        - ${cidrhost(aws_eks_cluster.projectx_cluster.kubernetes_network_config[0].service_ipv4_cidr, 10)}
+        - 172.20.0.10
     flags:
       - --node-labels=node.kubernetes.io/lifecycle=normal
-EOF
-
-# Initialize node with nodeadm
-/usr/bin/nodeadm init --config-source file:///etc/eks/node-config.yaml
-EOT
+  EOT
   )
 
   tag_specifications {
@@ -53,6 +42,8 @@ EOT
       project_name                                = var.project_name
       environment                                 = var.environment
       "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+
+
     }
   }
 
@@ -64,4 +55,5 @@ EOT
       "kubernetes.io/cluster/${var.cluster_name}" = "owned"
     }
   }
+
 }
