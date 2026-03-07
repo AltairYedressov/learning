@@ -25,8 +25,9 @@ module "eks_worker_nodes" {
 module "ebs_csi_irsa_role" {
   source = "../../../iam-role-module"
 
-  role_name   = var.ebs_csi_irsa_role
-  environment = var.environment
+  role_name          = var.ebs_csi_irsa_role
+  environment        = var.environment
+  assume_role_action = "sts:AssumeRoleWithWebIdentity"
 
   principal_type = "Federated"
 
