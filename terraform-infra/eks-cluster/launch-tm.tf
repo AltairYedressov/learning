@@ -1,3 +1,8 @@
+resource "aws_iam_instance_profile" "workers_instance_profile" {
+  name = "${var.cluster_name}-workers-instance-profile"
+  role = data.aws_iam_role.eks_worker_nodes_role.name
+}
+
 resource "aws_launch_template" "workers_lt" {
   name                   = "${var.cluster_name}-workers-lt"
   image_id               = data.aws_ssm_parameter.eks_worker_ami.value
