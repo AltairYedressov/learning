@@ -17,7 +17,6 @@ resource "aws_launch_template" "workers_lt" {
   }
 
   user_data = base64encode(<<-EOT
-
 ---
 apiVersion: node.eks.aws/v1alpha1
 kind: NodeConfig
@@ -30,12 +29,11 @@ spec:
   kubelet:
     config:
       clusterDNS:
-        
-172.20.0.10
-  flags:
---node-labels=node.kubernetes.io/lifecycle=normal
-EOT
-)
+        - ${cidrhost(aws_eks_cluster.projectx_cluster.kubernetes_network_config[0].service_ipv4_cidr, 10)}
+    flags:
+      - --node-labels=node.kubernetes.io/lifecycle=normal
+  EOT
+  )
 
   tag_specifications {
     resource_type = "instance"
