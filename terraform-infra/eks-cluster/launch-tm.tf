@@ -17,14 +17,26 @@ resource "aws_launch_template" "workers_lt" {
   }
 
   user_data = base64encode(<<-EOT
----
+#!/bin/bash
+set -e
+
+# Create folder for EKS CA
+mkdir -p /etc/eks
+
+# Write cluster CA to file (nodeadm expects a file for AL2023 AMIs)
+cat <<'EOF' > /etc/eks/ca.crt
+${aws_eks_cluster.projectx_cluster.certificate_authority[0].data}
+EOF
+
+# Create NodeConfig YAML for nodeadm
+cat <<'EOF' > /etc/eks/node-config.yaml
 apiVersion: node.eks.aws/v1alpha1
 kind: NodeConfig
 spec:
   cluster:
     name: ${var.cluster_name}
     apiServerEndpoint: ${aws_eks_cluster.projectx_cluster.endpoint}
-    certificateAuthority: ${aws_eks_cluster.projectx_cluster.certificate_authority[0].data}
+    certificateAuthority: file:///etc/eks/ca.crt
     cidr: ${aws_eks_cluster.projectx_cluster.kubernetes_network_config[0].service_ipv4_cidr}
   kubelet:
     config:
@@ -32,7 +44,11 @@ spec:
         - ${cidrhost(aws_eks_cluster.projectx_cluster.kubernetes_network_config[0].service_ipv4_cidr, 10)}
     flags:
       - --node-labels=node.kubernetes.io/lifecycle=normal
-  EOT
+EOF
+
+# Initialize node with nodeadm
+/usr/bin/nodeadm init --config-source file:///etc/eks/node-config.yaml
+EOT
   )
 
   tag_specifications {
@@ -42,8 +58,6 @@ spec:
       project_name                                = var.project_name
       environment                                 = var.environment
       "kubernetes.io/cluster/${var.cluster_name}" = "owned"
-
-
     }
   }
 
@@ -55,5 +69,4 @@ spec:
       "kubernetes.io/cluster/${var.cluster_name}" = "owned"
     }
   }
-
 }
