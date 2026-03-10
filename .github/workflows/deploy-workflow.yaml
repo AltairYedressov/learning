@@ -84,6 +84,10 @@ jobs:
           TF_VAR_github_repo: ${{ github.event.repository.name }}
         continue-on-error: true
 
+      - name: Show Full Plan Output
+        if: always()    # ← runs even if previous step failed
+        run: cat /tmp/plan.txt
+
       # 8️⃣ Terraform Apply (only on main branch)
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
