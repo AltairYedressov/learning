@@ -5,7 +5,7 @@
 **/*.tfstate
 **/*.tfstate.*
 /terraform-infra/bootstrap/*.tfvars
-**/*.lock*
+
 
 # Crash logs
 crash.log
