@@ -4,16 +4,20 @@
 # Terraform state files (local)
 **/*.tfstate
 **/*.tfstate.*
+
+# Sensitive tfvars
 /terraform-infra/bootstrap/*.tfvars
-**/*.lock*
+*.auto.tfvars
 
 # Crash logs
 crash.log
 
-# Ignore override files, but not main code
+# Ignore override files
 override.tf
 override.tf.json
-*.auto.tfvars
 
 # Ignore plan output
 *.plan
+
+# NOTE: .terraform.lock.hcl should NOT be ignored
+# it must be committed to git
