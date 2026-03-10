@@ -1,3 +1,13 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.100.0"
+    }
+  }
+}
+
+
 resource "aws_iam_instance_profile" "workers_instance_profile" {
   name = "${var.cluster_name}-workers-instance-profile"
   role = data.aws_iam_role.eks_worker_nodes_role.name
