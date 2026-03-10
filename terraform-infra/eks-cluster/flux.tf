@@ -2,17 +2,21 @@
 
 terraform {
   required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
     flux = {
-      source  = "fluxcd/flux"
-      version = "~> 1.3"
+      source  = "fluxcd/flux"        # ← must specify non-hashicorp source
+      version = "~> 1.8"
     }
     github = {
-      source  = "integrations/github"
-      version = "~> 6.0"
+      source  = "integrations/github" # ← must specify non-hashicorp source
+      version = "~> 6.11"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
+      version = "~> 2.38"
     }
   }
 }
@@ -35,7 +39,6 @@ provider "kubernetes" {
   }
 }
 
-# connects flux to your github repo
 provider "flux" {
   kubernetes = {
     host = aws_eks_cluster.projectx_cluster.endpoint

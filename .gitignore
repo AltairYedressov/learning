@@ -4,16 +4,18 @@
 # Terraform state files (local)
 **/*.tfstate
 **/*.tfstate.*
-/terraform-infra/bootstrap/*.tfvars
+**/*.lock.*
 
+# Sensitive tfvars
+/terraform-infra/bootstrap/*.tfvars
+*.auto.tfvars
 
 # Crash logs
 crash.log
 
-# Ignore override files, but not main code
+# Ignore override files
 override.tf
 override.tf.json
-*.auto.tfvars
 
 # Ignore plan output
 *.plan

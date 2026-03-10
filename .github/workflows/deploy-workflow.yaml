@@ -55,7 +55,7 @@ jobs:
       - name: Terraform Init
         run: |
           AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)
-          terraform init -upgrade \
+          terraform init \
             -backend-config="bucket=${AWS_ACCOUNT_ID}-terraform-state-${{ env.ENVIRONMENT_STAGE }}" \
             -backend-config="key=${{ env.ENVIRONMENT_STAGE }}/${{ matrix.stack }}/terraform.tfstate" \
             -backend-config="region=${{ env.AWS_REGION }}" \
@@ -71,12 +71,11 @@ jobs:
 
       # 7️⃣ Terraform Plan
       - name: Terraform Plan
-        run: terraform plan -input=false
+        run: terraform plan -input=false -no-color 2>&1 | tee /tmp/plan.txt
         env:
           TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
           TF_VAR_github_org: ${{ github.repository_owner }}
           TF_VAR_github_repo: ${{ github.event.repository.name }}
-        continue-on-error: true
 
       # 8️⃣ Terraform Apply (only on main branch)
       - name: Terraform Apply
