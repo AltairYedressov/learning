@@ -5,7 +5,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.100" # ← matches your lock file exactly
+      version = "5.100.0" # ← matches your lock file exactly
     }
     flux = {
       source  = "fluxcd/flux"
