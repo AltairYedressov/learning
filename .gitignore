@@ -19,6 +19,3 @@ override.tf.json
 
 # Ignore plan output
 *.plan
-
-# NOTE: .terraform.lock.hcl should NOT be ignored
-# it must be committed to git
