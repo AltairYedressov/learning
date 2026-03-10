@@ -4,7 +4,7 @@
 # Terraform state files (local)
 **/*.tfstate
 **/*.tfstate.*
-**/*.lock*
+**/*.lock.*
 
 # Sensitive tfvars
 /terraform-infra/bootstrap/*.tfvars
