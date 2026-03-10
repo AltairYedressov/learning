@@ -60,7 +60,12 @@ jobs:
             -backend-config="key=${{ env.ENVIRONMENT_STAGE }}/${{ matrix.stack }}/terraform.tfstate" \
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="encrypt=true"
-  
+      - name: Debug Lock File in Repo
+        run: |
+          echo "=== Lock file in git ==="
+          cat terraform-infra/root/dev/eks/.terraform.lock.hcl | grep version
+          echo "=== Git log ==="
+          git log --oneline -5
       # 5️⃣ Terraform Format
       - name: Terraform Format
         run: terraform fmt -check
