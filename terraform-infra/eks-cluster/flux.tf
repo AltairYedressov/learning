@@ -1,22 +1,3 @@
-# terraform-infra/eks-cluster/flux.tf
-
-terraform {
-  required_providers {
-    flux = {
-      source  = "fluxcd/flux"
-      version = "~> 1.3"
-    }
-    github = {
-      source  = "integrations/github"
-      version = "~> 6.0"
-    }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
-    }
-  }
-}
-
 # connects to the EKS cluster we just created
 provider "kubernetes" {
   host = aws_eks_cluster.projectx_cluster.endpoint
@@ -35,7 +16,6 @@ provider "kubernetes" {
   }
 }
 
-# connects flux to your github repo
 provider "flux" {
   kubernetes = {
     host = aws_eks_cluster.projectx_cluster.endpoint
