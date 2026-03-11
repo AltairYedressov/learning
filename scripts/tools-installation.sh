@@ -25,7 +25,7 @@ echo ">>> Flux CLI installed ✅"
 echo ">>> Verifying installations..."
 eksctl version
 kubectl version --client
-flux version
+flux version --client
 
 echo "================================================"
 echo " All tools installed ✅"
