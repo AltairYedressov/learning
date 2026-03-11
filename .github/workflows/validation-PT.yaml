@@ -45,9 +45,9 @@ jobs:
       - name: Bootstrap Flux
         run: |
           chmod +x scripts/bootstrap-flux.sh
-          ./scripts/bootstrap-flux.sh \
-            ${{ github.head_ref }} \
-            clusters/test
+          BRANCH="${{ github.head_ref }}"
+          CLUSTER_PATH="clusters/test"
+          ./scripts/bootstrap-flux.sh "$BRANCH" "$CLUSTER_PATH"
         env:
           GITHUB_TOKEN: ${{ secrets.FLUX_GITHUB_PAT }}
           GITHUB_ORG: ${{ github.repository_owner }}
@@ -65,4 +65,4 @@ jobs:
         if: always()
         run: |
           chmod +x scripts/destroy-cluster.sh
-          ./scripts/destroyl-cluster.sh ${{ env.CLUSTER_NAME }}
+          ./scripts/destroy-cluster.sh ${{ env.CLUSTER_NAME }}
