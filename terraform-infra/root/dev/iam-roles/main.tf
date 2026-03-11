@@ -46,3 +46,31 @@ module "ebs_csi_irsa_role" {
     "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
   ]
 }
+
+module "karpenter_irsa_role" {
+  source = "../../../iam-role-module"
+
+  role_name          = var.karpenter_irsa_role
+  environment        = var.environment
+  assume_role_action = "sts:AssumeRoleWithWebIdentity"
+
+  principal_type = "Federated"
+
+  principal_identifiers = [
+    data.aws_iam_openid_connect_provider.eks_oidc_provider.arn
+  ]
+
+  assume_role_conditions = {
+    sub = {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:karpenter:karpenter"]
+    }
+    aud = {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+  }
+  custom_policy_json_path = "${path.module}/../../../iam-role-module/Policies/karpenter_policy.json"
+}
