@@ -1,0 +1,64 @@
+# .github/workflows/ephemeral-test.yml
+name: Ephemeral Cluster Test
+
+on:
+  push:
+    branches:
+      - feature/**
+
+env:
+  AWS_REGION: us-east-1
+  CLUSTER_NAME: pr-${{ github.event.number }}
+  GITHUB_TOKEN: ${{ secrets.FLUX_GITHUB_PAT }}  
+  GITHUB_ORG: ${{ github.repository_owner }}
+  GITHUB_REPO: ${{ github.event.repository.name }}
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.IAM_ROLE }}
+          role-session-name: GitHubActionsSession
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install Tools
+        run: |
+          chmod +x scripts/install-tools.sh
+          ./scripts/tools-installation.sh
+
+      - name: Create Temporary Cluster
+        run: |
+          chmod +x scripts/cluster-creation.sh
+          ./scripts/cluster-creation.sh ${{ env.CLUSTER_NAME }}
+
+      - name: Bootstrap Flux
+        run: |
+          chmod +x scripts/bootstrap-flux.sh
+          ./scripts/bootstrap-flux.sh \
+            ${{ github.head_ref }} \
+            clusters/test
+        env:
+          GITHUB_TOKEN: ${{ secrets.FLUX_GITHUB_PAT }}
+          GITHUB_ORG: ${{ github.repository_owner }}
+          GITHUB_REPO: learning
+
+      - name: Wait for Deployments
+        run: sleep 120
+
+      - name: Run Validation
+        run: |
+          chmod +x scripts/validation.sh
+          ./scripts/validation.sh
+
+      - name: Destroy Temporary Cluster
+        if: always()
+        run: |
+          chmod +x scripts/destroy-cluster.sh
+          ./scripts/destroyl-cluster.sh ${{ env.CLUSTER_NAME }}
