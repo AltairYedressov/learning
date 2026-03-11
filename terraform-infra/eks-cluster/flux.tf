@@ -7,7 +7,7 @@ terraform {
       version = "~> 6.0"
     }
     flux = {
-      source  = "fluxcd/flux"        # ← must specify non-hashicorp source
+      source  = "fluxcd/flux" # ← must specify non-hashicorp source
       version = "~> 1.8"
     }
     github = {
@@ -21,7 +21,7 @@ terraform {
   }
 }
 
-# connects to the EKS cluster we just created
+# connects to the EKS 
 provider "kubernetes" {
   host = aws_eks_cluster.projectx_cluster.endpoint
   cluster_ca_certificate = base64decode(

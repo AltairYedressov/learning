@@ -26,3 +26,8 @@ variable "ebs_csi_irsa_role" {
   type    = string
   default = "ebs-csi-irsa-role"
 }
+
+variable "karpenter_irsa_role" {
+  type    = string
+  default = "karpenter_irsa_role"
+}
