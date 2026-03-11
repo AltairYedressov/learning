@@ -12,7 +12,7 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  CLUSTER_NAME: pr-${{ github.event.number }}
+  CLUSTER_NAME: pr-${{ github.run_id }}
   GITHUB_TOKEN: ${{ secrets.FLUX_GITHUB_PAT }}  
   GITHUB_ORG: ${{ github.repository_owner }}
   GITHUB_REPO: ${{ github.event.repository.name }}
