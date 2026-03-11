@@ -1,0 +1,23 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: karpenter
+  namespace: karpenter
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: karpenter
+      version: "1.x.x"
+      sourceRef:
+        kind: HelmRepository
+        name: karpenter
+        namespace: flux-system
+  values:
+    serviceAccount:
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::372517046622:role/karpenter-controller-role
+    settings:
+      clusterName: projectx
+      clusterEndpoint: https://D61E52E76FBF3DDE20ED109C2F383FF4.gr7.us-east-1.eks.amazonaws.com
+      interruptionQueue: projectx-karpenter
