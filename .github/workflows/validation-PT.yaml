@@ -34,7 +34,7 @@ jobs:
 
       - name: Install Tools
         run: |
-          chmod +x scripts/install-tools.sh
+          chmod +x scripts/tools-installation.sh
           ./scripts/tools-installation.sh
 
       - name: Create Temporary Cluster
