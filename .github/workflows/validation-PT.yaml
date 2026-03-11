@@ -6,6 +6,10 @@ on:
     branches:
       - feature/**
 
+permissions:
+  id-token: write       # required for GitHub OIDC
+  contents: write       # required for checkout
+
 env:
   AWS_REGION: us-east-1
   CLUSTER_NAME: pr-${{ github.event.number }}
