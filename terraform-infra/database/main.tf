@@ -17,7 +17,7 @@ resource "aws_db_instance" "default" {
 
   # credentials
   username                            = var.username
-  manage_master_user_password   = true
+  manage_master_user_password         = true
   iam_database_authentication_enabled = var.iam_database_authentication_enabled
 
   # network
@@ -83,16 +83,16 @@ resource "aws_db_subnet_group" "default" {
 resource "aws_db_instance" "dr_replica" {
   count = var.create_dr_replica ? 1 : 0
 
-  identifier          = "${var.db_name}-dr"
-  replicate_source_db = aws_db_instance.default.arn
-  instance_class      = var.instance_class
-  publicly_accessible = false
-  skip_final_snapshot = false
-  final_snapshot_identifier = "${var.db_name}-dr-final"
-  backup_retention_period = var.retention_period
-  deletion_protection     = var.deletion_protection
+  identifier                 = "${var.db_name}-dr"
+  replicate_source_db        = aws_db_instance.default.arn
+  instance_class             = var.instance_class
+  publicly_accessible        = false
+  skip_final_snapshot        = false
+  final_snapshot_identifier  = "${var.db_name}-dr-final"
+  backup_retention_period    = var.retention_period
+  deletion_protection        = var.deletion_protection
   auto_minor_version_upgrade = var.auto_minor_version_upgrade
-  maintenance_window      = var.maintenance_window
+  maintenance_window         = var.maintenance_window
 
   # monitoring
   monitoring_interval = var.monitoring_interval
@@ -108,7 +108,7 @@ resource "aws_db_instance" "dr_replica" {
     role        = "dr-replica"
   }
 
-  provider = aws.dr   # ← points to DR region
+  provider = aws.dr # ← points to DR region
 }
 
 # ─── Cross Region Snapshot Copy ──────────────────
@@ -119,5 +119,5 @@ resource "aws_db_instance_automated_backups_replication" "dr" {
   retention_period       = var.retention_period
   kms_key_id             = var.dr_kms_key_id
 
-  provider = aws.dr   # ← copies backups to DR region
+  provider = aws.dr # ← copies backups to DR region
 }

@@ -1,16 +1,16 @@
 variable "vpc_cidr" {
-  type = string
+  type        = string
   description = "VPC cidr range where database is deployed"
 }
 
 variable "db_name" {
-    type = string
-    description = "Database name"
+  type        = string
+  description = "Database name"
 }
 
 variable "db_username" {
-  type = string 
-  description = "Username of database" 
+  type        = string
+  description = "Username of database"
 }
 
 variable "environment" {
