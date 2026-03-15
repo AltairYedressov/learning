@@ -95,13 +95,13 @@ variable "performance_insights_retention_period" {
 }
 
 variable "snapshot_identifier" {
-  type        = string
+  type        = bool
   description = "Specifies whether or not to create this database from a snapshot"
   default     = null
 }
 
 variable "vpc_security_group_ids" {
-  type        = list(string)
+  type        = string
   description = "List of VPC security groups to associate"
 }
 
