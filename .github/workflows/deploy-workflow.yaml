@@ -35,7 +35,7 @@ jobs:
     steps:
       # 1️⃣ Checkout repo
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 2️⃣ Setup Terraform
       - name: Setup Terraform
