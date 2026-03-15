@@ -22,7 +22,7 @@ resource "aws_db_instance" "default" {
 
   # network
   db_subnet_group_name   = aws_db_subnet_group.default.name
-  vpc_security_group_ids = data.aws_security_group.database_sg.ids
+  vpc_security_group_ids = data.aws_security_group.database_sg.id
   publicly_accessible    = var.publicly_accessible
   multi_az               = var.multi_az
 
