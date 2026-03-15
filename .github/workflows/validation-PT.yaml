@@ -45,7 +45,7 @@ jobs:
       - name: Bootstrap Flux
         run: |
           chmod +x scripts/bootstrap-flux.sh
-          BRANCH="${{ github.head_ref }}"
+          BRANCH="${{ github.head_ref || github.ref_name }}"
           CLUSTER_PATH="clusters/test"
           ./scripts/bootstrap-flux.sh $BRANCH $CLUSTER_PATH
         env:
