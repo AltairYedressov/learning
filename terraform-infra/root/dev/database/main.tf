@@ -10,15 +10,15 @@ module "rds" {
 
   vpc_cidr = var.vpc_cidr
 
-  db_name                = var.db_name
-  engine                 = "mysql"
-  engine_version         = "8.0"
-  instance_class         = "db.t3.micro"
-  username               = var.db_username
-  environment            = var.environment
-  subnet_ids             = data.aws_subnets.private.ids
-  vpc_security_group_ids = data.aws_security_group.database_sg.id
-  monitoring_role_arn    = "arn:aws:iam::372517046622:role/DevopsAccessRole"
+  db_name                      = var.db_name
+  engine                       = "mysql"
+  engine_version               = "8.0"
+  instance_class               = "db.t3.micro"
+  username                     = var.db_username
+  environment                  = var.environment
+  subnet_ids                   = data.aws_subnets.private.ids
+  vpc_security_group_ids       = data.aws_security_group.database_sg.id
+  monitoring_role_arn          = "arn:aws:iam::372517046622:role/DevopsAccessRole"
   performance_insights_enabled = false
   # tier 1 - always on
   multi_az            = false # true in prod
