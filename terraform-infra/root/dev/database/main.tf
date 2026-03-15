@@ -2,9 +2,9 @@
 module "rds" {
   source = "../../../database"
 
-   providers = {
+  providers = {
     aws    = aws
-    aws.dr = aws.dr    # ← add this
+    aws.dr = aws.dr # ← add this
   }
 
   vpc_cidr = var.vpc_cidr
