@@ -90,3 +90,18 @@ resource "aws_security_group_rule" "worker_sg_self_reference_all" {
   source_security_group_id = module.worker-nodes-sg.security_group_id
   description              = "Allow all traffic between worker nodes for pod networking and DNS"
 }
+
+module "database-sg" {
+  source      = "../../../networking/security-group"
+  name        = "database-sg"
+  description = "Scurity Group for databasse"
+  vpc_id      = module.vpc.vpc_id
+  environment = var.environment
+  rules = [
+    {
+      cidr      = module.vpc.cidr_block
+      from_port = 3306
+      to_port   = 3306
+    }
+  ]
+}

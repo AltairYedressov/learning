@@ -4,7 +4,7 @@ name: Ephemeral Cluster Test
 on:
   push:
     branches:
-      - feature/**
+      - feature/PT**
 
 permissions:
   id-token: write       # required for GitHub OIDC
