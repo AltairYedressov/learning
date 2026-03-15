@@ -229,7 +229,3 @@ variable "vpc_cidr" {
   description = "VPC cidr range where database is deployed"
 }
 
-variable "vpc_security_group_ids" {
-  type        = list(string)
-  description = "List of sg"
-}
