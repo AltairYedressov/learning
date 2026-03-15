@@ -32,4 +32,3 @@ spec:
   tags:
     Name: karpenter-node
     environment: dev
-    kubernetes.io/cluster/projectx: owned
