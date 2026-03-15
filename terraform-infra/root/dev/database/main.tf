@@ -7,6 +7,7 @@ module "rds" {
     aws.dr = aws.dr # ← add this
   }
 
+
   vpc_cidr = var.vpc_cidr
 
   db_name                = var.db_name
@@ -15,9 +16,8 @@ module "rds" {
   instance_class         = "db.t3.micro"
   username               = var.db_username
   environment            = var.environment
-  subnet_ids             = data.terraform_remote_state.networking.outputs.private_subnet_ids
-  vpc_security_group_ids = [data.terraform_remote_state.networking.outputs.rds_sg_id]
-
+  subnet_ids             = data.aws_subnets.private.ids
+  vpc_security_group_ids = var.vpc_security_group_ids
   # tier 1 - always on
   multi_az            = false # true in prod
   retention_period    = 14
