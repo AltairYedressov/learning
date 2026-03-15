@@ -24,11 +24,6 @@ module "rds" {
   enable_cross_region_backup = false
 }
 
-# DR region provider
-provider "aws" {
-  alias  = "dr"
-  region = "us-west-2"
-}
 
 
 ## DR Tier Summary in Your Code
