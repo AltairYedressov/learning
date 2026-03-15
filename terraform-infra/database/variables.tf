@@ -91,7 +91,7 @@ variable "performance_insights_enabled" {
 variable "performance_insights_retention_period" {
   type        = number
   description = "Amount of time in days to retain Performance Insights data. Valid values are 7, 731 (2 years) or a multiple of 31"
-  default     = 7
+  default     = null
 }
 
 variable "snapshot_identifier" {
