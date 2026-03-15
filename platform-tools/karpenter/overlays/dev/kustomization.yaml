@@ -4,4 +4,3 @@ resources:
   - ../../base
 patches:
   - path: patch.yaml
-  - path: nodepool-patch.yaml
