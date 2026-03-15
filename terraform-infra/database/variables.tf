@@ -190,7 +190,7 @@ variable "environment" {
 variable "iam_database_authentication_enabled" {
   type        = bool
   description = "Enable IAM database authentication instead of password"
-  default     = false
+  default     = true
 }
 
 # ─── Subnet Group ────────────────────────────────

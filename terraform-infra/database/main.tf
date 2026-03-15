@@ -88,7 +88,7 @@ resource "aws_db_instance" "dr_replica" {
   instance_class             = var.instance_class
   publicly_accessible        = false
   skip_final_snapshot        = false
-  final_snapshot_identifier = "${replace(var.db_name, "_", "-")}-dr-final-snapshot"
+  final_snapshot_identifier  = "${replace(var.db_name, "_", "-")}-dr-final-snapshot"
   backup_retention_period    = var.retention_period
   deletion_protection        = var.deletion_protection
   auto_minor_version_upgrade = var.auto_minor_version_upgrade
