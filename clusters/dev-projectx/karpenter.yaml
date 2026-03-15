@@ -11,3 +11,20 @@ spec:
   sourceRef:
     kind: GitRepository
     name: flux-system
+
+---
+
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: karpenter-nodepool
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./platform-tools/karpenter/nodepool/overlays/dev  # ← dev overlay
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: karpenter    

@@ -1,4 +1,4 @@
-# platform-tools/karpenter/overlays/dev/nodepool-patch.yaml
+# platform-tools/karpenter/nodepool/overlays/dev/patch.yaml
 apiVersion: karpenter.sh/v1
 kind: NodePool
 metadata:
@@ -9,7 +9,7 @@ spec:
       requirements:
         - key: karpenter.sh/capacity-type
           operator: In
-          values: ["spot"]           # dev → spot only
+          values: ["spot"]          # dev → spot only
         - key: kubernetes.io/arch
           operator: In
           values: ["amd64"]
