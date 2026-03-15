@@ -22,7 +22,7 @@ resource "aws_db_instance" "default" {
 
   # network
   db_subnet_group_name   = aws_db_subnet_group.default.name
-  vpc_security_group_ids = data.aws_security_group.database_sg.id
+  vpc_security_group_ids = [data.aws_security_group.database_sg.id]
   publicly_accessible    = var.publicly_accessible
   multi_az               = var.multi_az
 
@@ -70,7 +70,7 @@ resource "aws_db_instance" "default" {
 # ─── Subnet Group ────────────────────────────────
 resource "aws_db_subnet_group" "default" {
   name        = "${var.db_name}-subnet-group"
-  subnet_ids  = [data.aws_subnets.private.ids]
+  subnet_ids  = data.aws_subnets.private.ids
   description = "Subnet group for ${var.db_name}"
 
   tags = {
