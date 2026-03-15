@@ -38,7 +38,7 @@ resource "aws_db_instance" "default" {
 
   # snapshots
   skip_final_snapshot       = var.skip_final_snapshot
-  final_snapshot_identifier = var.skip_final_snapshot ? null : var.db_name
+  final_snapshot_identifier = var.skip_final_snapshot ? null : "${replace(var.db_name, "_", "-")}-final-snapshot"
   snapshot_identifier       = var.snapshot_identifier
 
   # maintenance
@@ -88,7 +88,7 @@ resource "aws_db_instance" "dr_replica" {
   instance_class             = var.instance_class
   publicly_accessible        = false
   skip_final_snapshot        = false
-  final_snapshot_identifier  = "${var.db_name}-dr-final"
+  final_snapshot_identifier = "${replace(var.db_name, "_", "-")}-dr-final-snapshot"
   backup_retention_period    = var.retention_period
   deletion_protection        = var.deletion_protection
   auto_minor_version_upgrade = var.auto_minor_version_upgrade
