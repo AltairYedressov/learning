@@ -80,7 +80,7 @@ variable "monitoring_interval" {
 variable "monitoring_role_arn" {
   type        = string
   description = "The ARN for the IAM role that permits RDS to send enhanced monitoring metrics to CloudWatch Logs."
-  default     = null
+  default     = "0"
 }
 variable "performance_insights_enabled" {
   type        = bool
@@ -190,7 +190,7 @@ variable "environment" {
 variable "iam_database_authentication_enabled" {
   type        = bool
   description = "Enable IAM database authentication instead of password"
-  default     = false
+  default     = true
 }
 
 # ─── Subnet Group ────────────────────────────────
