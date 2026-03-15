@@ -19,6 +19,7 @@ module "rds" {
   subnet_ids             = data.aws_subnets.private.ids
   vpc_security_group_ids = data.aws_security_group.database_sg.id
   monitoring_role_arn    = "arn:aws:iam::372517046622:role/DevopsAccessRole"
+  performance_insights_enabled = false
   # tier 1 - always on
   multi_az            = false # true in prod
   retention_period    = 14
