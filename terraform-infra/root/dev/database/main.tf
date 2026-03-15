@@ -17,7 +17,7 @@ module "rds" {
   username               = var.db_username
   environment            = var.environment
   subnet_ids             = data.aws_subnets.private.ids
-  vpc_security_group_ids = var.vpc_security_group_ids
+  vpc_security_group_ids = data.aws_security_group.database_sg.id
   # tier 1 - always on
   multi_az            = false # true in prod
   retention_period    = 14

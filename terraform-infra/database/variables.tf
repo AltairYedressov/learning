@@ -101,7 +101,7 @@ variable "snapshot_identifier" {
 }
 
 variable "vpc_security_group_ids" {
-  type        = list(string)
+  type        = string
   description = "List of VPC security groups to associate"
 }
 
@@ -229,7 +229,3 @@ variable "vpc_cidr" {
   description = "VPC cidr range where database is deployed"
 }
 
-variable "vpc_security_group_ids" {
-  type        = list(string)
-  description = "List of sg"
-}

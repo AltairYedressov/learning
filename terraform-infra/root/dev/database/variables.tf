@@ -16,8 +16,3 @@ variable "db_username" {
 variable "environment" {
   type = string
 }
-
-variable "vpc_security_group_ids" {
-  type        = list(string)
-  description = "List of sg"
-}
