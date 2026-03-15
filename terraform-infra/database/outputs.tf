@@ -28,3 +28,8 @@ output "subnet_group_name" {
   value       = aws_db_subnet_group.default.name
   description = "DB subnet group name"
 }
+
+output "db_secret_arn" {
+  value       = aws_db_instance.default.master_user_secret[0].secret_arn
+  description = "ARN of secret in Secrets Manager - app reads from here"
+}

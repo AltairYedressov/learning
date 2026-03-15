@@ -23,10 +23,10 @@ variable "username" {
   description = "Username of database" 
 }
 
-variable "password" {
-    type = string
-    description = "Password for database"
-    sensitive = true
+variable "manage_master_user_password" {
+  type        = bool
+  description = "Let AWS manage and rotate the master password automatically"
+  default     = true
 }
 
 variable "retention_period" {
@@ -38,11 +38,13 @@ variable "retention_period" {
 variable "backup_target" {
   type = string
   description = " Specifies where automated backups and manual snapshots are stored. Possible values are region (default) and outposts"
+  default     = "region"
 }
 
 variable "backup_window" {
   type = string 
   description = "The daily time range (in UTC) during which automated backups are created if they are enabled"
+  default     = "03:00-04:00"
 }
 
 variable "blue_green_update_enabled" {
@@ -153,6 +155,7 @@ variable "publicly_accessible" {
 variable "db_subnet_group_name" {
   type        = string
   description = "DB subnet group name - which subnets DB lives in"
+  default     = null
 }
 
 variable "parameter_group_name" {

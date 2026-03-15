@@ -17,12 +17,12 @@ resource "aws_db_instance" "default" {
 
   # credentials
   username                            = var.username
-  password                            = var.password
+  manage_master_user_password   = true
   iam_database_authentication_enabled = var.iam_database_authentication_enabled
 
   # network
   db_subnet_group_name   = aws_db_subnet_group.default.name
-  vpc_security_group_ids = var.vpc_security_group_ids
+  vpc_security_group_ids = [data.aws_subnets.private.id]
   publicly_accessible    = var.publicly_accessible
   multi_az               = var.multi_az
 
