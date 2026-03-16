@@ -1,4 +1,3 @@
-# clusters/dev-projectx/karpenter.yaml
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -6,14 +5,13 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
+  timeout: 5m
   path: ./platform-tools/karpenter/overlays/dev
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-
 ---
-
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -21,10 +19,11 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  path: ./platform-tools/karpenter/nodepool/overlays/dev  # ← dev overlay
+  timeout: 5m              # ← add timeout
+  path: ./platform-tools/karpenter/nodepool/overlays/dev
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
   dependsOn:
-    - name: karpenter    
+    - name: karpenter
