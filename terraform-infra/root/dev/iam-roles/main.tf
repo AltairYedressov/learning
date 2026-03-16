@@ -89,7 +89,7 @@ module "velero_irsa_role" {
     sub = {
       test     = "StringEquals"
       variable = "${replace(data.aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:sub"
-      values   = ["system:serviceaccount:velero:velero"]
+      values   = ["system:serviceaccount:velero:velero-server"]
     }
     aud = {
       test     = "StringEquals"
