@@ -24,6 +24,19 @@
       "Resource": "*"
     },
     {
+      "Sid": "AllowIAM",
+      "Effect": "Allow",
+      "Action": [
+        "iam:GetInstanceProfile",
+        "iam:CreateInstanceProfile",
+        "iam:TagInstanceProfile",
+        "iam:AddRoleToInstanceProfile",
+        "iam:RemoveRoleFromInstanceProfile",
+        "iam:DeleteInstanceProfile"
+      ],
+      "Resource": "*"
+    },
+    {
       "Sid": "AllowPassRole",
       "Effect": "Allow",
       "Action": "iam:PassRole",
