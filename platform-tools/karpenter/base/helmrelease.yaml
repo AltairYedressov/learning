@@ -16,7 +16,7 @@ spec:
   values:
     serviceAccount:
       annotations:
-        eks.amazonaws.com/role-arn: arn:aws:iam::372517046622:role/karpenter-controller-role
+        eks.amazonaws.com/role-arn: arn:aws:iam::372517046622:role/karpenter_irsa_role
     settings:
       clusterName: projectx
       clusterEndpoint: https://D61E52E76FBF3DDE20ED109C2F383FF4.gr7.us-east-1.eks.amazonaws.com
