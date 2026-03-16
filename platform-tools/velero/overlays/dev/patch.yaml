@@ -1,3 +1,4 @@
+# platform-tools/velero/overlays/dev/patch.yaml
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -5,6 +6,16 @@ metadata:
   namespace: velero
 spec:
   values:
+    kubectl:
+      image:
+        repository: docker.io/bitnami/kubectl
+        tag: "1.30"    # ← exists, has shell, matches k8s version
+    initContainers:
+      - name: velero-plugin-for-aws
+        image: velero/velero-plugin-for-aws:v1.11.0
+        volumeMounts:
+          - mountPath: /target
+            name: plugins
     configuration:
       backupStorageLocation:
         - name: default
@@ -12,11 +23,16 @@ spec:
           bucket: 372517046622-velero-backups-dev
           config:
             region: us-east-1
+      volumeSnapshotLocation:
+        - name: default
+          provider: aws
+          config:
+            region: us-east-1
     schedules:
       daily-backup:
-        schedule: "0 22 * * *"    # every day at 2am
+        schedule: "0 22 * * *"
         template:
-          ttl: 168h               # keep for 7 days
+          ttl: 168h
           includedNamespaces:
             - monitoring
             - karpenter
