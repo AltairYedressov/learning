@@ -1,0 +1,23 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: velero
+  namespace: velero
+spec:
+  values:
+    configuration:
+      backupStorageLocation:
+        - name: default
+          provider: aws
+          bucket: 372517046622-velero-backups-dev
+          config:
+            region: us-east-1
+    schedules:
+      daily-backup:
+        schedule: "0 2 * * *"    # every day at 2am
+        template:
+          ttl: 168h               # keep for 7 days
+          includedNamespaces:
+            - monitoring
+            - karpenter
+            - flux-system
