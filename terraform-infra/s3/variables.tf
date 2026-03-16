@@ -22,10 +22,10 @@ variable "kms_key_id" {
 
 variable "lifecycle_rules" {
   type = list(object({
-    id             = string
-    enabled        = bool
+    id              = string
+    enabled         = bool
     expiration_days = optional(number)
-    transitions    = list(object({
+    transitions = list(object({
       days          = number
       storage_class = string
     }))

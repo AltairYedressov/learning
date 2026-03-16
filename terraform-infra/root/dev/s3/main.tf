@@ -10,7 +10,7 @@ module "velero_bucket" {
     {
       id              = "expire-old-backups"
       enabled         = true
-      expiration_days = 30      # delete backups older than 30 days
+      expiration_days = 30 # delete backups older than 30 days
       transitions     = []
     }
   ]
