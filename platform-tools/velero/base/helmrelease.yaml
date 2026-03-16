@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: velero
-      version: "8.x.x"
+      version: "8.x.x"        # ← pin to specific version e.g. "8.1.0"
       sourceRef:
         kind: HelmRepository
         name: velero
@@ -17,6 +17,7 @@ spec:
     serviceAccount:
       annotations:
         eks.amazonaws.com/role-arn: arn:aws:iam::372517046622:role/velero-role
+
     configuration:
       backupStorageLocation:
         - name: default
@@ -29,9 +30,10 @@ spec:
           provider: aws
           config:
             region: us-east-1
+
     initContainers:
       - name: velero-plugin-for-aws
-        image: velero/velero-plugin-for-aws:v1.10.0
+        image: velero/velero-plugin-for-aws:v1.11.0    # ← v1.11.x matches velero v1.15.x
         volumeMounts:
           - mountPath: /target
             name: plugins
