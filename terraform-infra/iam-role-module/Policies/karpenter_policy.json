@@ -32,7 +32,8 @@
         "iam:TagInstanceProfile",
         "iam:AddRoleToInstanceProfile",
         "iam:RemoveRoleFromInstanceProfile",
-        "iam:DeleteInstanceProfile"
+        "iam:DeleteInstanceProfile",
+        "iam:ListInstanceProfiles"
       ],
       "Resource": "*"
     },
