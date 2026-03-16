@@ -39,7 +39,7 @@ metadata:
 spec:
   amiSelectorTerms:
     - alias: al2023@latest
-  role: eks_worker_nodes_role
+  role: projectx-workers-instance-profile
   subnetSelectorTerms:
     - tags:
         Type: public
