@@ -5,18 +5,29 @@ metadata:
   namespace: velero
 spec:
   interval: 10m
+
   chart:
     spec:
       chart: velero
-      version: "8.x.x"        # ← pin to specific version e.g. "8.1.0"
+      version: "8.1.0"
       sourceRef:
         kind: HelmRepository
         name: velero
         namespace: flux-system
+
   values:
+
+    upgradeCRDs: true
+
+    kubectl:
+      image:
+        repository: registry.k8s.io/kubectl
+        tag: v1.30.0
+
     serviceAccount:
-      annotations:
-        eks.amazonaws.com/role-arn: arn:aws:iam::372517046622:role/velero-role
+      server:
+        annotations:
+          eks.amazonaws.com/role-arn: arn:aws:iam::372517046622:role/velero-role
 
     configuration:
       backupStorageLocation:
@@ -25,6 +36,7 @@ spec:
           bucket: 372517046622-velero-backups-dev
           config:
             region: us-east-1
+
       volumeSnapshotLocation:
         - name: default
           provider: aws
@@ -33,7 +45,8 @@ spec:
 
     initContainers:
       - name: velero-plugin-for-aws
-        image: velero/velero-plugin-for-aws:v1.11.0    # ← v1.11.x matches velero v1.15.x
+        image: velero/velero-plugin-for-aws:v1.11.0
+        imagePullPolicy: IfNotPresent
         volumeMounts:
           - mountPath: /target
             name: plugins
