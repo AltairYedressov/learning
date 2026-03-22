@@ -1,0 +1,24 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: thanos
+  namespace: monitoring
+spec:
+  values:
+    query:
+      replicaCount: 2
+
+    queryFrontend:
+      replicaCount: 2
+
+    storegateway:
+      replicaCount: 2
+      persistence:
+        size: 20Gi
+
+    compactor:
+      persistence:
+        size: 50Gi
+      retentionResolutionRaw: 90d
+      retentionResolution5m: 180d
+      retentionResolution1h: 365d

@@ -100,3 +100,33 @@ module "velero_irsa_role" {
   custom_policy_json_path = "${path.module}/../../../iam-role-module/Policies/velero_policy.json"
   aws_managed_policy_arns = []
 }
+
+module "thanos_irsa_role" {
+  source = "../../../iam-role-module"
+
+  role_name          = "thanos-role"
+  environment        = var.environment
+  assume_role_action = "sts:AssumeRoleWithWebIdentity"
+  principal_type     = "Federated"
+  principal_identifiers = [
+    data.aws_iam_openid_connect_provider.eks_oidc_provider.arn
+  ]
+  assume_role_conditions = {
+    sub = {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:sub"
+      values = [
+        "system:serviceaccount:monitoring:thanos-storegateway",
+        "system:serviceaccount:monitoring:thanos-compactor",
+        "system:serviceaccount:monitoring:kube-prometheus-stack-prometheus"
+      ]
+    }
+    aud = {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+  }
+  custom_policy_json_path = "${path.module}/../../../iam-role-module/Policies/thanos_policy.json"
+  aws_managed_policy_arns = []
+}
