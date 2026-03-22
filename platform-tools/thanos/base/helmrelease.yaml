@@ -15,7 +15,6 @@ spec:
         kind: HelmRepository
         name: bitnami
         namespace: flux-system
-      interval: 1h
 
   install:
     crds: Create
