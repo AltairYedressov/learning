@@ -29,6 +29,11 @@ spec:
       strategy: rollback
 
   values:
+    image:
+      registry: docker.io
+      repository: thanosio/thanos
+      tag: v0.36.1
+
     existingObjstoreSecret: thanos-objstore-secret
 
     query:
