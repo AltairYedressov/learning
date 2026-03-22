@@ -1,0 +1,94 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: sealed-secrets
+  namespace: flux-system
+spec:
+  interval: 1h
+  releaseName: sealed-secrets
+  targetNamespace: sealed-secrets
+  chart:
+    spec:
+      chart: sealed-secrets
+      version: ">=2.16.0 <3.0.0"    # semver range — pin to exact after testing
+      sourceRef:
+        kind: HelmRepository
+        name: sealed-secrets
+        namespace: flux-system
+      interval: 24h
+      verify:
+        provider: cosign              # chart provenance verification (Helm 3.12+)
+
+  install:
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+  rollback:
+    timeout: 5m
+    cleanupOnFail: true
+
+  values:
+    # --- Controller hardening ---
+    image:
+      pullPolicy: Always              # always re-pull; never use cached potentially-stale image
+
+    serviceAccount:
+      create: true
+      name: sealed-secrets-controller
+      annotations: {}                 # add IRSA or Workload Identity annotations here if needed
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+
+    securityContext:                  # pod-level
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+
+    containerSecurityContext:         # container-level
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      capabilities:
+        drop:
+          - ALL
+
+    # --- Key rotation ---
+    keyrenewperiod: "720h"            # rotate sealing key every 30 days
+    # keep old keys so existing SealedSecrets can still be decrypted
+    # kubeseal --fetch-cert handles picking up the new cert automatically
+
+    # --- Metrics & observability ---
+    metrics:
+      serviceMonitor:
+        enabled: false                # set true if you have Prometheus Operator
+
+    # --- Restrict which namespaces can be unsealed ---
+    # Default: controller unseals for any namespace it can watch.
+    # For strict multi-tenant setups, run one controller per tenant namespace
+    # or use the namespaceSelector approach below (requires controller >= 0.20):
+    # namespaceSelector:
+    #   matchLabels:
+    #     sealed-secrets.bitnami.com/managed: "true"
+
+    # --- Tolerations / node affinity (optional but recommended) ---
+    tolerations: []
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/os
+                  operator: In
+                  values:
+                    - linux
