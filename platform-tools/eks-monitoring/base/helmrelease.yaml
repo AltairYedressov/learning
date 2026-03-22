@@ -21,13 +21,25 @@ spec:
         type: ClusterIP
 
     prometheus:
+      serviceAccount:
+        annotations:
+          eks.amazonaws.com/role-arn: arn:aws:iam::372517046622:role/thanos-role
+      thanosService:
+        enabled: true
+      thanosServiceMonitor:
+        enabled: true
       prometheusSpec:
         retention: 10d
+        thanos:
+          objectStorageConfig:
+            existingSecret:
+              name: thanos-objstore-secret
+              key: objstore.yml
         storageSpec:
           volumeClaimTemplate:
             spec:
               accessModes: ["ReadWriteOnce"]
-              storageClassName: gp2  
+              storageClassName: gp2
               resources:
                 requests:
                   storage: 20Gi
