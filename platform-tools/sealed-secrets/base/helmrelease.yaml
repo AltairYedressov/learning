@@ -187,22 +187,7 @@ spec:
         maxUnavailable: 0
 
     # ── Liveness / readiness ────────────────────────────────────────────
-    # The chart exposes /healthz; these are sane starting values.
-    livenessProbe:
-      httpGet:
-        path: /healthz
-        port: 8080
-      initialDelaySeconds: 5
-      periodSeconds: 15
-      failureThreshold: 3
-
-    readinessProbe:
-      httpGet:
-        path: /healthz
-        port: 8080
-      initialDelaySeconds: 5
-      periodSeconds: 15
-      failureThreshold: 3
+    # The chart sets sensible /healthz probes by default — no override needed.
 
     # ── Ingress ────────────────────────────────────────────────────────
     # Typically not exposed; kubeseal fetches the cert in-cluster.
