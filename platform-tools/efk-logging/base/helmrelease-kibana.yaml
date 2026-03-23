@@ -17,10 +17,12 @@ spec:
         namespace: flux-system
 
   install:
+    disableHooks: true
     remediation:
       retries: 3
 
   upgrade:
+    disableHooks: true
     cleanupOnFail: true
     remediation:
       retries: 3
@@ -28,6 +30,8 @@ spec:
 
   values:
     replicas: 1
+
+    protocol: http
 
     elasticsearchHosts: "http://elasticsearch-master:9200"
 
@@ -60,3 +64,6 @@ spec:
         server.host: "0.0.0.0"
         elasticsearch.hosts: ["http://elasticsearch-master:9200"]
         server.shutdownTimeout: "5s"
+        xpack.security.enabled: false
+        xpack.fleet.enabled: false
+        xpack.encryptedSavedObjects.encryptionKey: "a]V}:xN2kzP!DLbe#MsR+uz!&lt;dRC+pN6"
