@@ -54,10 +54,19 @@ spec:
 
     protocol: http
 
-    # Disable all security/TLS — ES 8.x enables it by default
+    # Disable all security/TLS — ES 8.x chart injects SSL via env vars
+    # so we must override them explicitly
     secret:
       enabled: false
       password: ""
+
+    extraEnvs:
+      - name: xpack.security.enabled
+        value: "false"
+      - name: xpack.security.http.ssl.enabled
+        value: "false"
+      - name: xpack.security.transport.ssl.enabled
+        value: "false"
 
     esConfig:
       elasticsearch.yml: |
