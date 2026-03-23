@@ -36,9 +36,9 @@ spec:
 
     elasticsearchHosts: "http://elasticsearch-master:9200"
 
-    # Disable cert/credential mounts — security is off
-    elasticsearchCertificateSecret: ""
-    elasticsearchCredentialSecret: ""
+    # Chart requires a cert secret even when security is disabled —
+    # uses a dummy secret with empty values (created by SealedSecret or manually)
+    elasticsearchCertificateSecret: elasticsearch-master-certs
     secretMounts: []
 
     resources:
