@@ -1,0 +1,82 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: elasticsearch
+  namespace: logging
+spec:
+  interval: 10m
+  timeout: 15m
+
+  chart:
+    spec:
+      chart: elasticsearch
+      version: "8.5.1"
+      sourceRef:
+        kind: HelmRepository
+        name: elastic
+        namespace: flux-system
+
+  install:
+    crds: Create
+    remediation:
+      retries: 3
+
+  upgrade:
+    crds: CreateReplace
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+      strategy: rollback
+
+  values:
+    replicas: 2
+
+    minimumMasterNodes: 1
+
+    resources:
+      requests:
+        cpu: 250m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+
+    volumeClaimTemplate:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: gp2
+      resources:
+        requests:
+          storage: 30Gi
+
+    esJavaOpts: "-Xmx1g -Xms1g"
+
+    clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
+
+    protocol: http
+
+    esConfig:
+      elasticsearch.yml: |
+        xpack.security.enabled: false
+        xpack.security.enrollment.enabled: false
+
+    podSecurityContext:
+      runAsUser: 1000
+      fsGroup: 1000
+
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+
+    antiAffinity: soft
+
+    service:
+      type: ClusterIP
+      httpPortName: http
+      transportPortName: transport
+
+    lifecycle:
+      preStop:
+        exec:
+          command: ["/bin/sh", "-c", "sleep 20"]
