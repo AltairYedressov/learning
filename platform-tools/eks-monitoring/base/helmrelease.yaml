@@ -15,8 +15,10 @@ spec:
         namespace: flux-system
   values:
     grafana:
-      adminUser: admin
-      adminPassword: admin123
+      admin:
+        existingSecret: grafana-admin-credentials
+        userKey: admin-user
+        passwordKey: admin-password
       service:
         type: ClusterIP
 
