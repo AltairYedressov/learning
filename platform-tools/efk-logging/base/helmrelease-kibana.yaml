@@ -32,8 +32,12 @@ spec:
     replicas: 1
 
     protocol: http
+    createCert: false
 
     elasticsearchHosts: "http://elasticsearch-master:9200"
+
+    # Prevent mounting elasticsearch-master-certs (doesn't exist when createCert=false on ES)
+    secretMounts: []
 
     resources:
       requests:
