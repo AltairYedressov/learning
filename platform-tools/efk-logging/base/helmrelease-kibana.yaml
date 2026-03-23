@@ -36,7 +36,9 @@ spec:
 
     elasticsearchHosts: "http://elasticsearch-master:9200"
 
-    # Prevent mounting elasticsearch-master-certs (doesn't exist when createCert=false on ES)
+    # Disable cert/credential mounts — security is off
+    elasticsearchCertificateSecret: ""
+    elasticsearchCredentialSecret: ""
     secretMounts: []
 
     resources:
