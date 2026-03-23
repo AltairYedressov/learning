@@ -6,6 +6,7 @@ resources:
   - helmrepository-elastic.yaml
   - helmrepository-fluent.yaml
   - helmrelease-elasticsearch.yaml
+  - elasticsearch-dummy-certs.yaml
   - helmrelease-kibana.yaml
   - helmrelease-fluentbit.yaml
   - kibana-token-sealed-secret.yaml

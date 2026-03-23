@@ -36,9 +36,9 @@ spec:
 
     elasticsearchHosts: "http://elasticsearch-master:9200"
 
-    # Disable cert/credential mounts — security is off
-    elasticsearchCertificateSecret: ""
-    elasticsearchCredentialSecret: ""
+    # Chart requires a cert secret even when security is disabled —
+    # uses a dummy secret with empty values (created by SealedSecret or manually)
+    elasticsearchCertificateSecret: elasticsearch-master-certs
     secretMounts: []
 
     resources:
@@ -70,5 +70,4 @@ spec:
         server.host: "0.0.0.0"
         elasticsearch.hosts: ["http://elasticsearch-master:9200"]
         server.shutdownTimeout: "5s"
-        xpack.security.enabled: false
         xpack.encryptedSavedObjects.encryptionKey: "min-32-char-long-encryption-key!!"
