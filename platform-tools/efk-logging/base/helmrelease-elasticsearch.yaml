@@ -62,6 +62,12 @@ spec:
       enabled: false
       password: ""
 
+    # Readiness probe requires ELASTIC_PASSWORD to be set even when
+    # security is disabled — it exits 1 if the var is empty
+    extraEnvs:
+      - name: ELASTIC_PASSWORD
+        value: "disabled"
+
     esConfig:
       elasticsearch.yml: |
         xpack.security.enabled: false
