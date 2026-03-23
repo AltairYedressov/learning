@@ -17,4 +17,3 @@ spec:
                   storage: 10Gi
     grafana:
       replicas: 1
-      adminPassword: dev-password

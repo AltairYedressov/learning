@@ -8,4 +8,5 @@ resources:
   - helmrelease-elasticsearch.yaml
   - helmrelease-kibana.yaml
   - helmrelease-fluentbit.yaml
+  - kibana-token-sealed-secret.yaml
   - networkpolicy.yaml

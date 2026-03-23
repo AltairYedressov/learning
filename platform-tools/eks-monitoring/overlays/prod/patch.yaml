@@ -17,4 +17,3 @@ spec:
                   storage: 50Gi
     grafana:
       replicas: 2
-      adminPassword: prod-password

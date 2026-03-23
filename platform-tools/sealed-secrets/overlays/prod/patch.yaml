@@ -1,20 +1,34 @@
-# platform-tools/eks-monitoring/overlays/prod/patch.yaml
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: kube-prometheus-stack
-  namespace: monitoring
+  name: sealed-secrets
+  namespace: sealed-secrets
 spec:
   values:
-    prometheus:
-      prometheusSpec:
-        retention: 30d
-        storageSpec:
-          volumeClaimTemplate:
-            spec:
-              resources:
-                requests:
-                  storage: 50Gi
-    grafana:
-      replicas: 2
-      adminPassword: prod-password
+    replicaCount: 2
+
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+    metrics:
+      serviceMonitor:
+        enabled: true
+        namespace: monitoring
+        labels:
+          release: kube-prometheus-stack
+
+    networkPolicy:
+      enabled: true
+
+    logLevel: info
+
+    priorityClassName: system-cluster-critical
