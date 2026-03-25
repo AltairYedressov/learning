@@ -1,0 +1,57 @@
+name: CI/CD for Portfolio
+on:
+    push:
+        branches:
+            - main
+            - developPP
+
+# permission can be added at job level or workflow level
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+    deploy-app:
+        environment: |
+          ${{
+            github.ref == 'refs/heads/main' && 'production' ||
+            github.ref == 'refs/heads/develop' && 'staging' ||
+            startsWith(github.ref, 'refs/heads/feature/') && 'dev'
+          }}
+        runs-on: ubuntu-22.04
+
+        steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v3
+
+        - name: Login to AWS Role
+          uses: aws-actions/configure-aws-credentials@v5.1.1
+          with:
+            aws-region: us-east-1
+            role-to-assume: ${{ vars.IAM_ROLE }}
+            role-session-name: gha-login-session
+
+        - name: Login to Amazon ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v2
+        
+        - name: Configure short SHA tag
+          run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
+            
+        - name: Backend - Build, tag, and push docker image to Amazon ECR
+          working-directory: .
+          env:
+            REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            REPOSITORY: proshop-backend
+          run: |
+            docker build -f ./app/backend/Dockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+            docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+        - name: Frontend - Build, tag, and push docker image to Amazon ECR
+          working-directory: ./app/frontend/
+          env:
+            REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            REPOSITORY: proshop-frontend
+          run: |
+            docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+            docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG

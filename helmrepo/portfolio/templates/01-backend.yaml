@@ -1,0 +1,61 @@
+# ── Backend Deployment ───────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portfolio-api
+  namespace: portfolio
+  labels:
+    app: portfolio-api
+    tier: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: portfolio-api
+  template:
+    metadata:
+      labels:
+        app: portfolio-api
+        tier: backend
+    spec:
+      containers:
+        - name: api
+          image: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/portfolio-api:latest
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+# ── Backend Service (ClusterIP — internal only) ─────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: portfolio-api
+  namespace: portfolio
+  labels:
+    app: portfolio-api
+spec:
+  type: ClusterIP
+  selector:
+    app: portfolio-api
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
