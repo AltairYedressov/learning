@@ -3,7 +3,7 @@ name: Terraform - Multi Stack Deploy
 on:
   push:
     branches:
-      - feature/**
+      - feature/TF**
       - main
 
 permissions:
@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   terraform:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.0
 
     strategy:
       matrix:
