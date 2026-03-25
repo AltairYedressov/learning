@@ -1,2 +1,2 @@
 environment = "dev"
-ecr_name    = "HelmCharts"
+ecr_name    = "helm_charts"
