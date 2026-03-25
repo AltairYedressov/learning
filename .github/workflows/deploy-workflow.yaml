@@ -3,7 +3,7 @@ name: Terraform - Multi Stack Deploy
 on:
   push:
     branches:
-      - feature/TF**
+      - feature/**
       - main
 
 permissions:
@@ -24,7 +24,7 @@ jobs:
 
     strategy:
       matrix:
-        stack: [networking, iam-roles, eks, s3]
+        stack: [ecr]
 
     defaults:
       run:
