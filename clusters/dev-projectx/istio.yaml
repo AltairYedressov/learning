@@ -26,4 +26,4 @@ spec:
     kind: GitRepository
     name: flux-system
   dependsOn:
-    - name: karpenter
+    - name: istio-system
