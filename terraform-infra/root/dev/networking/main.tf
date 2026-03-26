@@ -105,3 +105,33 @@ module "database-sg" {
     }
   ]
 }
+
+module "alb-sg" {
+  source      = "../../../networking/security-group"
+  name        = "alb-sg"
+  description = "Security Group for ALB"
+  vpc_id      = module.vpc.vpc_id
+  environment = var.environment
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_https_to_alb" {
+  security_group_id            = module.alb-sg.security_group_id
+
+  ip_protocol = "tcp"
+  from_port   = 443
+  to_port     = 443
+  cidr_ipv4   = "0.0.0/0"
+
+  description = "Allow HTTPS traffic to ALB"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_http_to_alb" {
+  security_group_id            = module.alb-sg.security_group_id
+
+  ip_protocol = "tcp"
+  from_port   = 80
+  to_port     = 80
+  cidr_ipv4   = "0.0.0/0"
+
+  description = "Allow HTTP traffic to ALB"
+}
