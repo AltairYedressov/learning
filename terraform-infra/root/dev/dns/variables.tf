@@ -6,3 +6,8 @@ variable "domain_name" {
 variable "environment" {
   type = string
 }
+
+variable "istio_ingress_lb_hostname" {
+  type        = string
+  description = "Hostname of the Istio ingress NLB"
+}
