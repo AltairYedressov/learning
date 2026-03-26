@@ -1,0 +1,29 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: istio-system
+  namespace: flux-system
+spec:
+  interval: 10m
+  timeout: 5m
+  path: ./platform-tools/istio/istio-system/overlays/dev
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: istio-ingress
+  namespace: flux-system
+spec:
+  interval: 10m
+  timeout: 5m              # ← add timeout
+  path: ./platform-tools/istio/istio-ingress/overlays/dev
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: karpenter
