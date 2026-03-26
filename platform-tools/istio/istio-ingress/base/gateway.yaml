@@ -8,18 +8,9 @@ spec:
     istio: ingress
   servers:
     - port:
-        number: 8443
-        name: https
-        protocol: HTTP
-      hosts:
-        - "*.yedressov.com"
-        - "yedressov.com"
-    - port:
         number: 8080
         name: http
         protocol: HTTP
-      tls:
-        httpsRedirect: true
       hosts:
         - "*.yedressov.com"
         - "yedressov.com"
