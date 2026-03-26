@@ -2,56 +2,56 @@ name: CI/CD for Portfolio
 on:
     push:
         branches:
-            - main
-            - developPP
+            - [main]
+        paths:
+            - 'app/**'           
 
-# permission can be added at job level or workflow level
 permissions:
   id-token: write   # This is required for requesting the JWT
   contents: read    # This is required for actions/checkout
 
 jobs:
-    deploy-app:
-        environment: |
-          ${{
-            github.ref == 'refs/heads/main' && 'production' ||
-            github.ref == 'refs/heads/develop' && 'staging' ||
-            startsWith(github.ref, 'refs/heads/feature/') && 'dev'
-          }}
+    publish-images:
         runs-on: ubuntu-22.04
 
         steps:
+        # 1️⃣ Checkout repo
         - name: Checkout Repository
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
 
+        # 2️⃣ Login to AWS Role
         - name: Login to AWS Role
           uses: aws-actions/configure-aws-credentials@v5.1.1
           with:
             aws-region: us-east-1
             role-to-assume: ${{ vars.IAM_ROLE }}
             role-session-name: gha-login-session
-
+        
+        # 3️⃣ Login to Amazon ECR
         - name: Login to Amazon ECR
           id: login-ecr
           uses: aws-actions/amazon-ecr-login@v2
-        
+
+        # 4️⃣ Configure short SHA tag
         - name: Configure short SHA tag
           run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
-            
+
+        # 5️⃣ Build, tag, and push backend docker images to Amazon ECR
         - name: Backend - Build, tag, and push docker image to Amazon ECR
           working-directory: .
           env:
             REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-            REPOSITORY: proshop-backend
+            REPOSITORY: images/portfolio-backend
           run: |
             docker build -f ./app/backend/Dockerfile -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
             docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
+        # 6️⃣ Build, tag, and push frontend docker images to Amazon ECR
         - name: Frontend - Build, tag, and push docker image to Amazon ECR
           working-directory: ./app/frontend/
           env:
             REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-            REPOSITORY: proshop-frontend
+            REPOSITORY: images/portfolio-frontend
           run: |
             docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
             docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
