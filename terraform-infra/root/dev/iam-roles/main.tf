@@ -101,6 +101,32 @@ module "velero_irsa_role" {
   aws_managed_policy_arns = []
 }
 
+module "aws_lb_controller_irsa_role" {
+  source = "../../../iam-role-module"
+
+  role_name          = "aws-lb-controller-role"
+  environment        = var.environment
+  assume_role_action = "sts:AssumeRoleWithWebIdentity"
+  principal_type     = "Federated"
+  principal_identifiers = [
+    data.aws_iam_openid_connect_provider.eks_oidc_provider.arn
+  ]
+  assume_role_conditions = {
+    sub = {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:sub"
+      values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
+    }
+    aud = {
+      test     = "StringEquals"
+      variable = "${replace(data.aws_iam_openid_connect_provider.eks_oidc_provider.url, "https://", "")}:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+  }
+  custom_policy_json_path = "${path.module}/../../../iam-role-module/Policies/aws_lb_controller_policy.json"
+  aws_managed_policy_arns = []
+}
+
 module "thanos_irsa_role" {
   source = "../../../iam-role-module"
 
