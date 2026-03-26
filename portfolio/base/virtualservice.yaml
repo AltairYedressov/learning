@@ -1,0 +1,24 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: portfolio
+  namespace: portfolio
+spec:
+  hosts:
+    - "yedressov.com"
+  gateways:
+    - istio-ingress/main-gateway
+  http:
+    - match:
+        - uri:
+            prefix: /api
+      route:
+        - destination:
+            host: portfolio-api
+            port:
+              number: 8000
+    - route:
+        - destination:
+            host: portfolio-frontend
+            port:
+              number: 3000
