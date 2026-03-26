@@ -24,7 +24,7 @@ jobs:
 
     strategy:
       matrix:
-        stack: [s3]
+        stack: [dns]
 
     defaults:
       run:
