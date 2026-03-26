@@ -30,6 +30,7 @@
         "ec2:DescribeCoipPools",
         "ec2:GetCoipPoolUsage",
         "ec2:DescribeVpcEndpoints",
+        "ec2:DescribeRouteTables",
         "elasticloadbalancing:DescribeLoadBalancers",
         "elasticloadbalancing:DescribeLoadBalancerAttributes",
         "elasticloadbalancing:DescribeListeners",
