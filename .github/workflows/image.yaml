@@ -1,8 +1,9 @@
 name: CI/CD for Portfolio
+
 on:
     push:
         branches:
-            - [main]
+            - main
         paths:
             - 'app/**'           
 

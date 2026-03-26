@@ -5,6 +5,8 @@ on:
     branches:
       - feature/**
       - main
+    paths:
+            - 'terraform-infra/**'  
 
 permissions:
   id-token: write       # required for GitHub OIDC
