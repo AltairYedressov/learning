@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: ecr-charts
+  namespace: flux-system
+spec:
+  type: oci
+  interval: 10m
+  url: oci://372517046622.dkr.ecr.us-east-1.amazonaws.com/helm-charts/portfolio
+  provider: aws 

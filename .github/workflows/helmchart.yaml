@@ -2,7 +2,8 @@ name: CI for Helm charts
 
 on:
   push:
-    branches: main
+    branches: 
+      - main
     paths:
       - 'HelmCharts/**'           # only triggers on chart changes
 
