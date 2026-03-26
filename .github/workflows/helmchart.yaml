@@ -1,4 +1,4 @@
-name: Publish Helm Chart
+name: CI for Helm charts
 
 on:
   push:
