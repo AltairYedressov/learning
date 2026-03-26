@@ -10,13 +10,6 @@ spec:
     - istio-ingress/main-gateway
   http:
     - match:
-        - headers:
-            x-forwarded-proto:
-              exact: http
-      redirect:
-        scheme: https
-        redirectCode: 301
-    - match:
         - uri:
             prefix: /api
       route:
