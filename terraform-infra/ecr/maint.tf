@@ -1,5 +1,6 @@
 resource "aws_ecr_repository" "default" {
-  name                 = var.ecr_name
+  for_each             = toset(var.ecr_names)
+  name                 = each.value
   image_tag_mutability = var.image_tag_mutability
 
   image_scanning_configuration {
@@ -8,6 +9,6 @@ resource "aws_ecr_repository" "default" {
 
   tags = {
     Environment = var.environment
-    Name        = var.ecr_name
+    Name        = each.value
   }
 }
