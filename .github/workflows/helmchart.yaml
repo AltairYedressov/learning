@@ -3,6 +3,8 @@ name: Publish Helm Chart
 on:
   push:
     branches: main
+    paths:
+      - 'HelmCharts/**'           # only triggers on chart changes
 
 permissions:
   id-token: write   # This is required for requesting the JWT
