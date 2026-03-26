@@ -38,3 +38,26 @@ module "thanos_bucket" {
     }
   ]
 }
+
+module "lb_logs_bucket" {
+  source = "../../../s3"
+
+  bucket_name = "372517046622-lb-logs-dev"
+  environment = var.environment
+
+  versioning_enabled = false
+
+  lifecycle_rules = [
+    {
+      id              = "transition-to-ia"
+      enabled         = true
+      expiration_days = 365
+      transitions = [
+        {
+          days          = 30
+          storage_class = "STANDARD_IA"
+        }
+      ]
+    }
+  ]
+}
