@@ -1,9 +1,12 @@
 name: Publish Helm Chart
 on:
   push:
-    branches: [main]
+    branches: [main11]
     paths:
       - 'HelmCharts/**'           # only triggers on chart changes
+
+env:
+  CHART_DIR: "portfolio"
 
 jobs:
   publish:
@@ -27,6 +30,7 @@ jobs:
 
       # 4️⃣ Package and push Helm chart to Amazon ECR
       - name: Package and push chart
+        working-directory: ./HelmCharts
         run: |
-          helm package ./charts/proshop
-          helm push proshop-*.tgz oci://${{ steps.login-ecr.outputs.registry }}
+          helm package ${{ env.CHART_DIR }}
+          helm push portfolio-*.tgz oci://${{ steps.login-ecr.outputs.registry }}/helm-charts
