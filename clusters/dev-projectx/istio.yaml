@@ -27,3 +27,4 @@ spec:
     name: flux-system
   dependsOn:
     - name: istio-system
+    - name: aws-lb-controller
