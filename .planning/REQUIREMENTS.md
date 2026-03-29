@@ -23,7 +23,7 @@
 
 - [ ] **IAM-01**: RBAC audited — no unnecessary system:masters bindings, ClusterRoleBindings follow least privilege
 - [ ] **IAM-02**: All IRSA roles verified — each service account has minimal required AWS permissions
-- [ ] **IAM-03**: Worker node IAM role stripped of AmazonEC2FullAccess and ElasticLoadBalancingFullAccess (replaced with scoped policies)
+- [x] **IAM-03**: Worker node IAM role stripped of AmazonEC2FullAccess and ElasticLoadBalancingFullAccess (replaced with scoped policies)
 
 ### CI/CD Security
 
@@ -93,7 +93,7 @@
 | POL-02 | Phase 6: Kyverno Policy Engine | Complete |
 | IAM-01 | Phase 7: IAM & RBAC Hardening | Pending |
 | IAM-02 | Phase 7: IAM & RBAC Hardening | Pending |
-| IAM-03 | Phase 7: IAM & RBAC Hardening | Pending |
+| IAM-03 | Phase 7: IAM & RBAC Hardening | Complete |
 | EKS-04 | Phase 8: Secrets & Encryption | Pending |
 | EKS-05 | Phase 8: Secrets & Encryption | Pending |
 

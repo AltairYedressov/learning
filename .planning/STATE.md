@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.7.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-03-29T17:08:15.339Z"
+status: executing
+stopped_at: Completed 07-01-PLAN.md
+last_updated: "2026-03-29T17:48:13.030Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 8
-  completed_phases: 6
-  total_plans: 10
-  completed_plans: 10
+  completed_phases: 7
+  total_plans: 12
+  completed_plans: 12
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Every layer of the infrastructure follows security best practices, with no critical or high-severity vulnerabilities remaining.
-**Current focus:** Phase 06 — kyverno-policy-engine
+**Current focus:** Phase 07 — iam-rbac-hardening
 
 ## Current Position
 
-Phase: 7
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 07 (iam-rbac-hardening) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
 Last activity: 2026-03-29
 
 Progress: [░░░░░░░░░░] 0%
@@ -61,6 +61,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04 P01 | 1min | 2 tasks | 4 files |
 | Phase 05 P01 | 2min | 2 tasks | 4 files |
 | Phase 06 P01 | 1min | 2 tasks | 9 files |
+| Phase 07 P01 | 1min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,7 @@ Recent decisions affecting current work:
 - [Phase 06]: Used built-in podSecurity subrule instead of kyverno-policies chart for PSS Restricted coverage
 - [Phase 06]: UID 65534 (nobody) for Kyverno containers -- upstream default, not 1001 like sealed-secrets
 - [Phase 06]: No namespace exclusions on ClusterPolicy -- all namespaces audited per D-03, AWS-managed violations documented as expected per D-04
+- [Phase 07]: Removed AmazonEC2FullAccess, ElasticLoadBalancingFullAccess, AmazonEC2ContainerRegistryPowerUser from worker nodes; replaced with custom ec2:Describe* policy
 
 ### Pending Todos
 
@@ -106,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T17:04:30.818Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-03-29T17:48:13.028Z
+Stopped at: Completed 07-01-PLAN.md
 Resume file: None

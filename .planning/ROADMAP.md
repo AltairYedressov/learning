@@ -122,8 +122,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md -- Strip overprivileged managed policies from worker node IAM role, add scoped custom ec2:Describe* policy
-- [ ] 07-02-PLAN.md -- RBAC ClusterRoleBinding audit + IRSA policy review + sealed-secrets RBAC comments + access entry documentation
+- [x] 07-01-PLAN.md -- Strip overprivileged managed policies from worker node IAM role, add scoped custom ec2:Describe* policy
+- [x] 07-02-PLAN.md -- RBAC ClusterRoleBinding audit + IRSA policy review + sealed-secrets RBAC comments + access entry documentation
 
 ### Phase 8: Secrets & Encryption
 **Goal**: Kubernetes secrets are encrypted at rest using customer-managed keys and all secrets are managed exclusively through Sealed Secrets
