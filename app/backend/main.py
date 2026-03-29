@@ -8,6 +8,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import datetime
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.errors import RateLimitExceeded
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+
+limiter = Limiter(key_func=get_remote_address, default_limits=["60/minute"])
 
 app = FastAPI(
     title="Altair Yedressov Portfolio API",
@@ -15,12 +24,33 @@ app = FastAPI(
     version="1.0.0",
 )
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# ── Request Body Size Limit ─────────────────────────────────────────────────
+MAX_BODY_SIZE = 1024  # 1 KB -- GET-only API needs no body
+
+
+class LimitRequestBodyMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        content_length = request.headers.get("content-length")
+        if content_length and int(content_length) > MAX_BODY_SIZE:
+            return JSONResponse(
+                status_code=413,
+                content={"detail": "Request body too large"},
+            )
+        return await call_next(request)
+
+
+# ── Middleware (last added = outermost = runs first) ────────────────────────
+app.add_middleware(SlowAPIMiddleware)
+app.add_middleware(LimitRequestBodyMiddleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["https://yedressov.com", "http://localhost:3000"],
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["Content-Type"],
 )
 
 # ── Data Models ──────────────────────────────────────────────────────────────
@@ -151,7 +181,8 @@ PROJECTS: List[Project] = [
 # ── Endpoints ────────────────────────────────────────────────────────────────
 
 @app.get("/api/health", response_model=HealthCheck)
-def health():
+@limiter.exempt
+def health(request: Request):
     return HealthCheck(
         status="healthy",
         service="portfolio-api",
@@ -160,27 +191,27 @@ def health():
     )
 
 @app.get("/api/profile", response_model=Profile)
-def get_profile():
+def get_profile(request: Request):
     return PROFILE
 
 @app.get("/api/skills", response_model=List[Skill])
-def get_skills():
+def get_skills(request: Request):
     return SKILLS
 
 @app.get("/api/experience", response_model=List[Experience])
-def get_experience():
+def get_experience(request: Request):
     return EXPERIENCE
 
 @app.get("/api/certifications", response_model=List[Certification])
-def get_certifications():
+def get_certifications(request: Request):
     return CERTIFICATIONS
 
 @app.get("/api/projects", response_model=List[Project])
-def get_projects():
+def get_projects(request: Request):
     return PROJECTS
 
 @app.get("/api/all")
-def get_all():
+def get_all(request: Request):
     """Single endpoint returning all resume data."""
     return {
         "profile": PROFILE.dict(),
