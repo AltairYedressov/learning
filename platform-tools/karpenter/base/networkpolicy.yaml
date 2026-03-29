@@ -1,0 +1,40 @@
+# Default-deny all ingress/egress to Karpenter controller,
+# then allow only what it strictly needs.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: karpenter
+  namespace: karpenter
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow Prometheus metrics scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8000
+    # Allow webhook calls from kube-apiserver
+    - ports:
+        - protocol: TCP
+          port: 8443
+  egress:
+    # DNS resolution
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # AWS APIs (EC2, EKS, pricing, SSM) via HTTPS
+    - ports:
+        - protocol: TCP
+          port: 443
+    # kube-apiserver
+    - ports:
+        - protocol: TCP
+          port: 6443
