@@ -119,7 +119,11 @@ Plans:
   2. Each IRSA service account has only the minimum AWS permissions required for its function (verified by comparing actual vs required permissions)
   3. Worker node IAM role no longer has AmazonEC2FullAccess or ElasticLoadBalancingFullAccess (replaced with scoped policies)
   4. aws-auth ConfigMap (or EKS Access Entries) is backed up before any modification and cluster access is verified after changes
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 07-01-PLAN.md -- Strip overprivileged managed policies from worker node IAM role, add scoped custom ec2:Describe* policy
+- [ ] 07-02-PLAN.md -- RBAC ClusterRoleBinding audit + IRSA policy review + sealed-secrets RBAC comments + access entry documentation
 
 ### Phase 8: Secrets & Encryption
 **Goal**: Kubernetes secrets are encrypted at rest using customer-managed keys and all secrets are managed exclusively through Sealed Secrets
@@ -146,5 +150,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 4. Pod Security Hardening | 2/2 | Complete   | 2026-03-29 |
 | 5. Application Security | 0/1 | Planning complete | - |
 | 6. Kyverno Policy Engine | 0/1 | Planning complete | - |
-| 7. IAM & RBAC Hardening | 0/TBD | Not started | - |
+| 7. IAM & RBAC Hardening | 0/2 | Planning complete | - |
 | 8. Secrets & Encryption | 0/TBD | Not started | - |
