@@ -18,9 +18,22 @@ spec:
         app: portfolio-api
         tier: backend
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: api
           image: {{ .Values.images.api }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           ports:
             - containerPort: {{ .Values.ports.api }}
           resources:
@@ -42,6 +55,13 @@ spec:
               port: {{ .Values.ports.api }}
             initialDelaySeconds: 5
             periodSeconds: 10
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 100Mi
 ---
 # ── Backend Service (ClusterIP — internal only) ─────────────────────────────
 apiVersion: v1
