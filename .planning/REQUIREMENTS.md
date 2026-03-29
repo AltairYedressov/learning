@@ -32,9 +32,9 @@
 
 ### Application Security
 
-- [ ] **APP-01**: Backend CORS restricted to specific allowed origins (no wildcard)
-- [ ] **APP-02**: Rate limiting enabled on all public API endpoints
-- [ ] **APP-03**: Pydantic models enforce field constraints (max_length, regex patterns) on all inputs
+- [x] **APP-01**: Backend CORS restricted to specific allowed origins (no wildcard)
+- [x] **APP-02**: Rate limiting enabled on all public API endpoints
+- [x] **APP-03**: Pydantic models enforce field constraints (max_length, regex patterns) on all inputs
 
 ### Policy & Governance
 
@@ -85,9 +85,9 @@
 | NET-02 | Phase 3: Network Security | Complete |
 | NET-03 | Phase 3: Network Security | Complete |
 | EKS-03 | Phase 4: Pod Security Hardening | Complete |
-| APP-01 | Phase 5: Application Security | Pending |
-| APP-02 | Phase 5: Application Security | Pending |
-| APP-03 | Phase 5: Application Security | Pending |
+| APP-01 | Phase 5: Application Security | Complete |
+| APP-02 | Phase 5: Application Security | Complete |
+| APP-03 | Phase 5: Application Security | Complete |
 | EKS-02 | Phase 6: Kyverno Policy Engine | Pending |
 | POL-01 | Phase 6: Kyverno Policy Engine | Pending |
 | POL-02 | Phase 6: Kyverno Policy Engine | Pending |

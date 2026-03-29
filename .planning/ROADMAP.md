@@ -91,7 +91,10 @@ Plans:
   2. API endpoints enforce rate limits and a burst of requests beyond the threshold returns 429 status codes
   3. API input payloads exceeding field constraints (max_length, invalid patterns) are rejected with validation errors
   4. Legitimate API requests from allowed origins continue to work normally
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [x] 05-01-PLAN.md -- CORS restriction + slowapi rate limiting + body size middleware + test suite
 
 ### Phase 6: Kyverno Policy Engine
 **Goal**: An admission controller prevents non-compliant resources from being deployed to the cluster
@@ -138,7 +141,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. CI/CD Security Gate | 0/1 | Planning complete | - |
 | 3. Network Security | 2/4 | In Progress|  |
 | 4. Pod Security Hardening | 2/2 | Complete   | 2026-03-29 |
-| 5. Application Security | 0/TBD | Not started | - |
+| 5. Application Security | 0/1 | Planning complete | - |
 | 6. Kyverno Policy Engine | 0/TBD | Not started | - |
 | 7. IAM & RBAC Hardening | 0/TBD | Not started | - |
 | 8. Secrets & Encryption | 0/TBD | Not started | - |
