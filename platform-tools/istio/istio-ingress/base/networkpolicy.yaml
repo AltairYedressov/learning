@@ -1,0 +1,52 @@
+# Default-deny all ingress/egress to istio ingress gateway,
+# then allow only what it strictly needs.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-ingress
+spec:
+  podSelector:
+    matchLabels:
+      istio: ingressgateway
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow external traffic via NLB (HTTP redirect + HTTPS)
+    - ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8443
+  egress:
+    # DNS resolution
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Route traffic to application pods in portfolio namespace
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: portfolio
+      ports:
+        - protocol: TCP
+          port: 8000
+        - protocol: TCP
+          port: 3000
+    # istiod xDS configuration
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15012
+    # kube-apiserver (for service discovery)
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443
