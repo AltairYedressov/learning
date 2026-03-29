@@ -1,0 +1,13 @@
+# PERMISSIVE mTLS override for monitoring namespace.
+# Allows both plaintext and mTLS connections.
+# Required because Prometheus may not have an Istio sidecar,
+# and STRICT mode would break metrics scraping.
+# See RESEARCH.md Pitfall 5: "Monitoring Scraping Breaks with STRICT mTLS"
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: monitoring
+spec:
+  mtls:
+    mode: PERMISSIVE
