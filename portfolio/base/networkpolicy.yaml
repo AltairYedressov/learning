@@ -1,0 +1,115 @@
+# Default-deny all ingress/egress to portfolio-api,
+# then allow only what it strictly needs.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: portfolio-api
+  namespace: portfolio
+spec:
+  podSelector:
+    matchLabels:
+      app: portfolio-api
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow frontend pods to reach backend API
+    - from:
+        - podSelector:
+            matchLabels:
+              app: portfolio-frontend
+      ports:
+        - protocol: TCP
+          port: 8000
+    # Allow Istio ingress gateway (for /api routes via VirtualService)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-ingress
+      ports:
+        - protocol: TCP
+          port: 8000
+    # Allow Prometheus metrics scraping via Istio sidecar
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 15090
+  egress:
+    # DNS resolution
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # kube-apiserver (for service account token validation)
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443
+    # istiod xDS configuration
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15012
+---
+# Default-deny all ingress/egress to portfolio-frontend,
+# then allow only what it strictly needs.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: portfolio-frontend
+  namespace: portfolio
+spec:
+  podSelector:
+    matchLabels:
+      app: portfolio-frontend
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow Istio ingress gateway (for / routes via VirtualService)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-ingress
+      ports:
+        - protocol: TCP
+          port: 3000
+    # Allow Prometheus metrics scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 15090
+  egress:
+    # DNS resolution
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Backend API (per D-12: frontend only talks to backend)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: portfolio-api
+      ports:
+        - protocol: TCP
+          port: 8000
+    # istiod xDS configuration
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15012
