@@ -76,7 +76,11 @@ Plans:
   2. All pods have readOnlyRootFilesystem: true with emptyDir mounts for directories that require writes (e.g., /tmp)
   3. All pods drop ALL Linux capabilities and no pod requests privileged mode
   4. All workloads pass health checks and function correctly after security context changes
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md -- Portfolio Dockerfiles non-root user + Helm template security contexts
+- [ ] 04-02-PLAN.md -- EFK Elasticsearch + Kibana HelmRelease security context gap closure
 
 ### Phase 5: Application Security
 **Goal**: The backend API rejects malicious input and restricts cross-origin access
@@ -133,7 +137,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 1. Audit Baseline | 0/1 | Planning complete | - |
 | 2. CI/CD Security Gate | 0/1 | Planning complete | - |
 | 3. Network Security | 2/4 | In Progress|  |
-| 4. Pod Security Hardening | 0/TBD | Not started | - |
+| 4. Pod Security Hardening | 0/2 | Planning complete | - |
 | 5. Application Security | 0/TBD | Not started | - |
 | 6. Kyverno Policy Engine | 0/TBD | Not started | - |
 | 7. IAM & RBAC Hardening | 0/TBD | Not started | - |
