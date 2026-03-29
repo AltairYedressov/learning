@@ -23,7 +23,7 @@ Every layer of the infrastructure follows security best practices, with no criti
 
 - [ ] Network & VPC hardened (security groups, NACLs, routing, ingress/egress reviewed)
 - [ ] EKS cluster security hardened (RBAC, pod security, secrets, API server access)
-- [ ] IAM policies follow least privilege (roles, service accounts, IRSA)
+- [x] IAM policies follow least privilege (roles, service accounts, IRSA) — Validated in Phase 7: IAM & RBAC Hardening
 - [ ] CI/CD pipeline secured (Flux config, image scanning, supply chain)
 - [x] Application-level vulnerabilities fixed (CORS, rate limiting, input validation) — Validated in Phase 5: Application Security
 - [x] Kubernetes workload security (resource limits, security contexts, network policies) — Validated in Phase 4 (Pod Security) and Phase 6 (Kyverno Policy Engine)
@@ -75,4 +75,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-29 — Phase 6 (Kyverno Policy Engine) complete: Kyverno deployed via Flux GitOps, PSS Restricted ClusterPolicy in audit mode, deny-default NetworkPolicy, dev overlay with reduced resources*
+*Last updated: 2026-03-29 — Phase 7 (IAM & RBAC Hardening) complete: Worker node IAM stripped to least-privilege, RBAC audit documented all ClusterRoleBindings, IRSA policies verified scoped, EKS access entries documented*
