@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.7.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 05-01-PLAN.md
-last_updated: "2026-03-29T16:22:42.156Z"
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-29T17:04:30.821Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 8
-  completed_phases: 5
-  total_plans: 9
-  completed_plans: 9
+  completed_phases: 6
+  total_plans: 10
+  completed_plans: 10
   percent: 0
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Every layer of the infrastructure follows security best practices, with no critical or high-severity vulnerabilities remaining.
-**Current focus:** Phase 05 — application-security
+**Current focus:** Phase 06 — kyverno-policy-engine
 
 ## Current Position
 
-Phase: 6
-Plan: Not started
+Phase: 06 (kyverno-policy-engine) — EXECUTING
+Plan: 1 of 1
 Status: Phase complete — ready for verification
 Last activity: 2026-03-29
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 04 P02 | 1min | 2 tasks | 2 files |
 | Phase 04 P01 | 1min | 2 tasks | 4 files |
 | Phase 05 P01 | 2min | 2 tasks | 4 files |
+| Phase 06 P01 | 1min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,9 @@ Recent decisions affecting current work:
 - [Phase 05]: Hardcoded CORS origins (yedressov.com, localhost:3000) rather than env-var driven
 - [Phase 05]: allow_credentials=False and GET-only methods for portfolio API
 - [Phase 05]: 1KB body size limit via BaseHTTPMiddleware for GET-only static data API
+- [Phase 06]: Used built-in podSecurity subrule instead of kyverno-policies chart for PSS Restricted coverage
+- [Phase 06]: UID 65534 (nobody) for Kyverno containers -- upstream default, not 1001 like sealed-secrets
+- [Phase 06]: No namespace exclusions on ClusterPolicy -- all namespaces audited per D-03, AWS-managed violations documented as expected per D-04
 
 ### Pending Todos
 
@@ -102,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T16:19:30.759Z
-Stopped at: Completed 05-01-PLAN.md
+Last session: 2026-03-29T17:04:30.818Z
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None

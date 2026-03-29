@@ -14,7 +14,7 @@
 ### EKS Cluster Hardening
 
 - [x] **EKS-01**: CIS EKS Benchmark scan completed via kube-bench with all critical/high findings documented
-- [ ] **EKS-02**: Pod Security Standards enforced via Kyverno in audit mode on all namespaces
+- [x] **EKS-02**: Pod Security Standards enforced via Kyverno in audit mode on all namespaces
 - [x] **EKS-03**: All pods have security contexts (runAsNonRoot, readOnlyRootFilesystem, drop ALL capabilities)
 - [ ] **EKS-04**: EKS secrets encrypted at rest with KMS envelope encryption
 - [ ] **EKS-05**: All Kubernetes secrets managed via Sealed Secrets — no plain-text Secret manifests in Git or manual kubectl create secret
@@ -38,8 +38,8 @@
 
 ### Policy & Governance
 
-- [ ] **POL-01**: Kyverno deployed via Flux with Pod Security Standard policy set in audit mode
-- [ ] **POL-02**: All security policies stored in Git and deployed via Flux Kustomizations (policy-as-code)
+- [x] **POL-01**: Kyverno deployed via Flux with Pod Security Standard policy set in audit mode
+- [x] **POL-02**: All security policies stored in Git and deployed via Flux Kustomizations (policy-as-code)
 
 ## v2 Requirements
 
@@ -88,9 +88,9 @@
 | APP-01 | Phase 5: Application Security | Complete |
 | APP-02 | Phase 5: Application Security | Complete |
 | APP-03 | Phase 5: Application Security | Complete |
-| EKS-02 | Phase 6: Kyverno Policy Engine | Pending |
-| POL-01 | Phase 6: Kyverno Policy Engine | Pending |
-| POL-02 | Phase 6: Kyverno Policy Engine | Pending |
+| EKS-02 | Phase 6: Kyverno Policy Engine | Complete |
+| POL-01 | Phase 6: Kyverno Policy Engine | Complete |
+| POL-02 | Phase 6: Kyverno Policy Engine | Complete |
 | IAM-01 | Phase 7: IAM & RBAC Hardening | Pending |
 | IAM-02 | Phase 7: IAM & RBAC Hardening | Pending |
 | IAM-03 | Phase 7: IAM & RBAC Hardening | Pending |

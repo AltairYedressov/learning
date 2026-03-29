@@ -105,7 +105,10 @@ Plans:
   2. Pod Security Standard policies are active and PolicyReports show zero violations on existing workloads (because Phases 3-5 pre-remediated them)
   3. All Kyverno policies are stored in Git under the Flux Kustomization path and deployed via GitOps
   4. A test deployment violating Pod Security Standards is caught by Kyverno (audit mode reports the violation)
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [x] 06-01-PLAN.md -- Kyverno base manifests (HelmRelease, NetworkPolicy, PSS Restricted ClusterPolicy) + dev overlay + Flux Kustomization
 
 ### Phase 7: IAM & RBAC Hardening
 **Goal**: Cluster access follows least privilege with no unnecessary admin bindings or broad AWS permissions
@@ -142,6 +145,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Network Security | 2/4 | In Progress|  |
 | 4. Pod Security Hardening | 2/2 | Complete   | 2026-03-29 |
 | 5. Application Security | 0/1 | Planning complete | - |
-| 6. Kyverno Policy Engine | 0/TBD | Not started | - |
+| 6. Kyverno Policy Engine | 0/1 | Planning complete | - |
 | 7. IAM & RBAC Hardening | 0/TBD | Not started | - |
 | 8. Secrets & Encryption | 0/TBD | Not started | - |
