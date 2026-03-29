@@ -18,8 +18,12 @@ variable "eks_worker_nodes_role" {
 }
 
 variable "eks_worker_nodes_policy" {
-  type    = list(string)
-  default = ["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly", "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy", "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser", "arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess", "arn:aws:iam::aws:policy/AmazonEC2FullAccess"]
+  description = "AWS managed policies for EKS worker nodes - least privilege (Phase 7 hardened)"
+  type        = list(string)
+  default = [
+    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  ]
 }
 
 variable "ebs_csi_irsa_role" {

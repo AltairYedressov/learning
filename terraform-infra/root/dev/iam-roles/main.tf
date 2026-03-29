@@ -20,6 +20,7 @@ module "eks_worker_nodes" {
   principal_identifiers = ["ec2.amazonaws.com"]
 
   aws_managed_policy_arns = var.eks_worker_nodes_policy
+  custom_policy_json_path = "${path.module}/../../../iam-role-module/Policies/eks_worker_node_policy.json"
 }
 
 module "ebs_csi_irsa_role" {
