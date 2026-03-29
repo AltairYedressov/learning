@@ -7,9 +7,9 @@
 
 ### Network Security
 
-- [ ] **NET-01**: All namespaces have default-deny NetworkPolicies with explicit allow-lists for required traffic
-- [ ] **NET-02**: Security group egress rules restrict outbound traffic to required destinations only
-- [ ] **NET-03**: Istio PeerAuthentication enforces STRICT mTLS across all namespaces (no plaintext fallback)
+- [x] **NET-01**: All namespaces have default-deny NetworkPolicies with explicit allow-lists for required traffic
+- [x] **NET-02**: Security group egress rules restrict outbound traffic to required destinations only
+- [x] **NET-03**: Istio PeerAuthentication enforces STRICT mTLS across all namespaces (no plaintext fallback)
 
 ### EKS Cluster Hardening
 
@@ -81,9 +81,9 @@
 | EKS-01 | Phase 1: Audit Baseline | Complete |
 | CICD-01 | Phase 2: CI/CD Security Gate | Complete |
 | CICD-02 | Phase 2: CI/CD Security Gate | Complete |
-| NET-01 | Phase 3: Network Security | Pending |
-| NET-02 | Phase 3: Network Security | Pending |
-| NET-03 | Phase 3: Network Security | Pending |
+| NET-01 | Phase 3: Network Security | Complete |
+| NET-02 | Phase 3: Network Security | Complete |
+| NET-03 | Phase 3: Network Security | Complete |
 | EKS-03 | Phase 4: Pod Security Hardening | Pending |
 | APP-01 | Phase 5: Application Security | Pending |
 | APP-02 | Phase 5: Application Security | Pending |

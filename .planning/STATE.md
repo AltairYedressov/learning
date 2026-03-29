@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.7.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-03-29T03:13:32.200Z"
+status: executing
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-03-29T04:59:22.796Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 8
   completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 6
+  completed_plans: 4
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Every layer of the infrastructure follows security best practices, with no critical or high-severity vulnerabilities remaining.
-**Current focus:** Phase 02 — ci-cd-security-gate
+**Current focus:** Phase 03 — network-security
 
 ## Current Position
 
-Phase: 3
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 03 (network-security) — EXECUTING
+Plan: 3 of 4
+Status: Ready to execute
 Last activity: 2026-03-29
 
 Progress: [░░░░░░░░░░] 0%
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 01 P01 | 25min | 3 tasks | 3 files |
 | Phase 02 P01 | 2min | 3 tasks | 4 files |
+| Phase 03 P02 | 1min | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,9 @@ Recent decisions affecting current work:
 - [Phase 02]: Pinned trivy-action to SHA 57a97c7 and binary v0.69.3 (supply chain protection)
 - [Phase 02]: Checkov runs without --soft-fail to enforce hard gating
 - [Phase 02]: Branch protection enforce_admins=false for emergency bypass
+- [Phase 03]: Worker nodes keep HTTPS 443 egress to 0.0.0.0/0 for AWS API access (ECR, S3, STS)
+- [Phase 03]: Multi-document YAML for backend+frontend NetworkPolicies in single file
+- [Phase 03]: Monitoring namespace gets PERMISSIVE PeerAuthentication override to prevent Prometheus scraping breakage under STRICT mTLS
 
 ### Pending Todos
 
@@ -83,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T03:09:54.482Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-03-29T04:59:22.792Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None
