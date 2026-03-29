@@ -26,7 +26,7 @@ Every layer of the infrastructure follows security best practices, with no criti
 - [ ] IAM policies follow least privilege (roles, service accounts, IRSA)
 - [ ] CI/CD pipeline secured (Flux config, image scanning, supply chain)
 - [x] Application-level vulnerabilities fixed (CORS, rate limiting, input validation) — Validated in Phase 5: Application Security
-- [ ] Kubernetes workload security (resource limits, security contexts, network policies)
+- [x] Kubernetes workload security (resource limits, security contexts, network policies) — Validated in Phase 4 (Pod Security) and Phase 6 (Kyverno Policy Engine)
 
 ### Out of Scope
 
@@ -75,4 +75,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-29 — Phase 5 (Application Security) complete: CORS restricted to specific origins, slowapi rate limiting at 60/min, 1KB body size limit, 7-test security suite*
+*Last updated: 2026-03-29 — Phase 6 (Kyverno Policy Engine) complete: Kyverno deployed via Flux GitOps, PSS Restricted ClusterPolicy in audit mode, deny-default NetworkPolicy, dev overlay with reduced resources*
