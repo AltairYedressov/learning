@@ -1,0 +1,29 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pss-restricted-audit
+  labels:
+    app.kubernetes.io/managed-by: flux
+  annotations:
+    policies.kyverno.io/title: Pod Security Standards (Restricted)
+    policies.kyverno.io/category: Pod Security Standards
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Enforces the Restricted Pod Security Standard profile in audit mode.
+      Violations are logged in PolicyReports but resources are NOT blocked.
+      Applied to ALL namespaces per D-03. AWS-managed pod violations in
+      kube-system are documented as known/expected per D-04.
+spec:
+  background: true
+  validationFailureAction: Audit
+  rules:
+    - name: restricted
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        podSecurity:
+          level: restricted
+          version: latest
