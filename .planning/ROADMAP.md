@@ -45,7 +45,10 @@ Plans:
   2. A pull request with a Terraform misconfiguration flagged by Checkov is blocked from merging
   3. Trivy is pinned to v0.69.3 and trivy-action is pinned to commit SHA 57a97c7 (supply chain protection)
   4. CI pipeline scan results are visible in the GitHub Actions job output
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [x] 02-01-PLAN.md -- Integrate Trivy image scanning + Checkov IaC scanning into CI workflows, add branch protection via Terraform
 
 ### Phase 3: Network Security
 **Goal**: All cluster traffic is explicitly allowed or denied -- no implicit open access between namespaces or to the internet
@@ -122,7 +125,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Audit Baseline | 0/1 | Planning complete | - |
-| 2. CI/CD Security Gate | 0/TBD | Not started | - |
+| 2. CI/CD Security Gate | 0/1 | Planning complete | - |
 | 3. Network Security | 0/TBD | Not started | - |
 | 4. Pod Security Hardening | 0/TBD | Not started | - |
 | 5. Application Security | 0/TBD | Not started | - |

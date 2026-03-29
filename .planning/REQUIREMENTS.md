@@ -27,8 +27,8 @@
 
 ### CI/CD Security
 
-- [ ] **CICD-01**: Trivy image vulnerability scanning integrated into CI pipeline, blocking critical/high CVEs
-- [ ] **CICD-02**: Checkov IaC scanning integrated into CI pipeline for Terraform misconfigurations
+- [x] **CICD-01**: Trivy image vulnerability scanning integrated into CI pipeline, blocking critical/high CVEs
+- [x] **CICD-02**: Checkov IaC scanning integrated into CI pipeline for Terraform misconfigurations
 
 ### Application Security
 
@@ -79,8 +79,8 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | EKS-01 | Phase 1: Audit Baseline | Complete |
-| CICD-01 | Phase 2: CI/CD Security Gate | Pending |
-| CICD-02 | Phase 2: CI/CD Security Gate | Pending |
+| CICD-01 | Phase 2: CI/CD Security Gate | Complete |
+| CICD-02 | Phase 2: CI/CD Security Gate | Complete |
 | NET-01 | Phase 3: Network Security | Pending |
 | NET-02 | Phase 3: Network Security | Pending |
 | NET-03 | Phase 3: Network Security | Pending |

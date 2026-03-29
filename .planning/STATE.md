@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.7.0
 milestone_name: milestone
 status: verifying
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-03-29T02:28:06.264Z"
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-03-29T03:09:54.485Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 8
-  completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  completed_phases: 2
+  total_plans: 2
+  completed_plans: 2
   percent: 0
 ---
 
@@ -21,11 +21,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** Every layer of the infrastructure follows security best practices, with no critical or high-severity vulnerabilities remaining.
-**Current focus:** Phase 01 — audit-baseline
+**Current focus:** Phase 02 — ci-cd-security-gate
 
 ## Current Position
 
-Phase: 01 (audit-baseline) — EXECUTING
+Phase: 02 (ci-cd-security-gate) — EXECUTING
 Plan: 1 of 1
 Status: Phase complete — ready for verification
 Last activity: 2026-03-29
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01 P01 | 25min | 3 tasks | 3 files |
+| Phase 02 P01 | 2min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,9 @@ Recent decisions affecting current work:
 - [Init]: All changes via Terraform or GitOps manifests (no manual AWS console)
 - [Revision]: All secrets must be Sealed Secrets — no plain-text Secret manifests in Git (EKS-05 added to Phase 8)
 - [Phase 01]: CIS EKS v1.7.0 baseline: 26 PASS, 1 FAIL (cluster-admin), 19 WARN; AWS-managed controls N/A; public nodes acknowledged
+- [Phase 02]: Pinned trivy-action to SHA 57a97c7 and binary v0.69.3 (supply chain protection)
+- [Phase 02]: Checkov runs without --soft-fail to enforce hard gating
+- [Phase 02]: Branch protection enforce_admins=false for emergency bypass
 
 ### Pending Todos
 
@@ -79,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T02:28:06.261Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-03-29T03:09:54.482Z
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None
