@@ -59,7 +59,12 @@ Plans:
   2. DNS resolution (port 53 to kube-dns) and Istio sidecar ports (15012, 15001, 15006, 15090) continue to function after deny-all policies are applied
   3. Security group egress rules allow only required outbound destinations (no 0.0.0.0/0 egress on application security groups)
   4. Istio PeerAuthentication is STRICT across all namespaces and a plaintext HTTP request between services is rejected
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md -- Scope security group egress rules (Terraform module + root module)
+- [ ] 03-02-PLAN.md -- Portfolio NetworkPolicies + Istio STRICT mTLS PeerAuthentication
+- [ ] 03-03-PLAN.md -- Platform namespace NetworkPolicies (istio, flux, karpenter, monitoring, kube-system)
 
 ### Phase 4: Pod Security Hardening
 **Goal**: Every workload pod runs with minimal OS-level privileges
@@ -126,7 +131,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Audit Baseline | 0/1 | Planning complete | - |
 | 2. CI/CD Security Gate | 0/1 | Planning complete | - |
-| 3. Network Security | 0/TBD | Not started | - |
+| 3. Network Security | 0/3 | Planning complete | - |
 | 4. Pod Security Hardening | 0/TBD | Not started | - |
 | 5. Application Security | 0/TBD | Not started | - |
 | 6. Kyverno Policy Engine | 0/TBD | Not started | - |
