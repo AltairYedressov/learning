@@ -75,4 +75,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-28 — Phase 2 (CI/CD Security Gate) complete: Trivy + Checkov scanning in CI, branch protection via Terraform*
+*Last updated: 2026-03-29 — Phase 4 (Pod Security Hardening) complete: non-root containers, security contexts, readOnlyRootFilesystem on all portfolio and EFK pods*
