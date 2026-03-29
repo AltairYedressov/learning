@@ -40,6 +40,14 @@ module "cluster-sg" {
       to_port   = 443
     }
   ]
+  egress_rules = [
+    {
+      cidr      = module.vpc.cidr_block
+      from_port = 10250
+      to_port   = 10250
+      protocol  = "tcp"
+    }
+  ]
 }
 
 module "worker-nodes-sg" {
@@ -48,6 +56,32 @@ module "worker-nodes-sg" {
   description = "Scurity Group for cluste"
   vpc_id      = module.vpc.vpc_id
   environment = var.environment
+  egress_rules = [
+    {
+      cidr      = "0.0.0.0/0"
+      from_port = 443
+      to_port   = 443
+      protocol  = "tcp"
+    },
+    {
+      cidr      = "0.0.0.0/0"
+      from_port = 53
+      to_port   = 53
+      protocol  = "udp"
+    },
+    {
+      cidr      = "0.0.0.0/0"
+      from_port = 53
+      to_port   = 53
+      protocol  = "tcp"
+    },
+    {
+      cidr      = module.vpc.cidr_block
+      from_port = 0
+      to_port   = 0
+      protocol  = "-1"
+    }
+  ]
 }
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_from_workers" {
@@ -112,6 +146,26 @@ module "alb-sg" {
   description = "Security Group for ALB"
   vpc_id      = module.vpc.vpc_id
   environment = var.environment
+  egress_rules = [
+    {
+      cidr      = module.vpc.cidr_block
+      from_port = 30000
+      to_port   = 32767
+      protocol  = "tcp"
+    },
+    {
+      cidr      = module.vpc.cidr_block
+      from_port = 8080
+      to_port   = 8080
+      protocol  = "tcp"
+    },
+    {
+      cidr      = module.vpc.cidr_block
+      from_port = 8443
+      to_port   = 8443
+      protocol  = "tcp"
+    }
+  ]
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_https_to_alb" {
