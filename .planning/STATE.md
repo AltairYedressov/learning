@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.7.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-03-PLAN.md
-last_updated: "2026-03-29T12:06:38.737Z"
+stopped_at: Completed 03-04-PLAN.md
+last_updated: "2026-03-29T12:07:11.121Z"
 last_activity: 2026-03-29
 progress:
   total_phases: 8
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-28)
 ## Current Position
 
 Phase: 03 (network-security) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-03-29
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 02 P01 | 2min | 3 tasks | 4 files |
 | Phase 03 P02 | 1min | 3 tasks | 6 files |
 | Phase 03 P03 | 1min | 2 tasks | 6 files |
+| Phase 03 P04 | 1min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ Recent decisions affecting current work:
 - [Phase 03]: Monitoring namespace gets PERMISSIVE PeerAuthentication override to prevent Prometheus scraping breakage under STRICT mTLS
 - [Phase 03]: istiod xDS/webhook ingress open from all sources (any sidecar needs xDS, API server calls webhooks from any IP)
 - [Phase 03]: flux-system uses podSelector: {} and HTTPS egress open to all destinations for GitHub/Helm/OCI registry access
+- [Phase 03]: CoreDNS ingress port 53 uses no from selector for cluster-wide DNS reachability
+- [Phase 03]: kube-system policies target specific pod labels rather than blanket podSelector: {}
 
 ### Pending Todos
 
@@ -90,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T12:06:38.735Z
-Stopped at: Completed 03-03-PLAN.md
+Last session: 2026-03-29T12:07:11.119Z
+Stopped at: Completed 03-04-PLAN.md
 Resume file: None
