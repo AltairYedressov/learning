@@ -64,8 +64,8 @@ Plans:
 Plans:
 - [x] 03-01-PLAN.md -- Scope security group egress rules (Terraform module + root module)
 - [x] 03-02-PLAN.md -- Portfolio NetworkPolicies + Istio STRICT mTLS PeerAuthentication + monitoring PERMISSIVE override
-- [ ] 03-03-PLAN.md -- Platform namespace NetworkPolicies (istio-ingress, istio-system, flux-system)
-- [ ] 03-04-PLAN.md -- Platform namespace NetworkPolicies (karpenter, monitoring, kube-system)
+- [x] 03-03-PLAN.md -- Platform namespace NetworkPolicies (istio-ingress, istio-system, flux-system)
+- [x] 03-04-PLAN.md -- Platform namespace NetworkPolicies (karpenter, monitoring, kube-system)
 
 ### Phase 4: Pod Security Hardening
 **Goal**: Every workload pod runs with minimal OS-level privileges
