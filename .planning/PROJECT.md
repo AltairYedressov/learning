@@ -25,7 +25,7 @@ Every layer of the infrastructure follows security best practices, with no criti
 - [ ] EKS cluster security hardened (RBAC, pod security, secrets, API server access)
 - [ ] IAM policies follow least privilege (roles, service accounts, IRSA)
 - [ ] CI/CD pipeline secured (Flux config, image scanning, supply chain)
-- [ ] Application-level vulnerabilities fixed (CORS, rate limiting, input validation)
+- [x] Application-level vulnerabilities fixed (CORS, rate limiting, input validation) — Validated in Phase 5: Application Security
 - [ ] Kubernetes workload security (resource limits, security contexts, network policies)
 
 ### Out of Scope
@@ -39,7 +39,7 @@ Every layer of the infrastructure follows security best practices, with no criti
 
 - Brownfield project: existing AWS EKS infrastructure managed by Terraform + Flux CD
 - Portfolio/learning project for DevOps/Platform Engineering practices
-- Known concerns from codebase analysis: CORS wildcard, no rate limiting, no input validation, hardcoded AWS account IDs, no API authentication
+- Known concerns from codebase analysis: ~~CORS wildcard~~, ~~no rate limiting~~, ~~no input validation~~, hardcoded AWS account IDs, no API authentication (CORS/rate-limiting/validation fixed in Phase 5)
 - Nodes intentionally kept in public subnets (user constraint)
 - Environments: dev, prod (test is ephemeral for CI)
 
@@ -75,4 +75,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-29 — Phase 4 (Pod Security Hardening) complete: non-root containers, security contexts, readOnlyRootFilesystem on all portfolio and EFK pods*
+*Last updated: 2026-03-29 — Phase 5 (Application Security) complete: CORS restricted to specific origins, slowapi rate limiting at 60/min, 1KB body size limit, 7-test security suite*
