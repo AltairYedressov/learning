@@ -15,7 +15,7 @@
 
 - [x] **EKS-01**: CIS EKS Benchmark scan completed via kube-bench with all critical/high findings documented
 - [ ] **EKS-02**: Pod Security Standards enforced via Kyverno in audit mode on all namespaces
-- [ ] **EKS-03**: All pods have security contexts (runAsNonRoot, readOnlyRootFilesystem, drop ALL capabilities)
+- [x] **EKS-03**: All pods have security contexts (runAsNonRoot, readOnlyRootFilesystem, drop ALL capabilities)
 - [ ] **EKS-04**: EKS secrets encrypted at rest with KMS envelope encryption
 - [ ] **EKS-05**: All Kubernetes secrets managed via Sealed Secrets — no plain-text Secret manifests in Git or manual kubectl create secret
 
@@ -84,7 +84,7 @@
 | NET-01 | Phase 3: Network Security | Complete |
 | NET-02 | Phase 3: Network Security | Complete |
 | NET-03 | Phase 3: Network Security | Complete |
-| EKS-03 | Phase 4: Pod Security Hardening | Pending |
+| EKS-03 | Phase 4: Pod Security Hardening | Complete |
 | APP-01 | Phase 5: Application Security | Pending |
 | APP-02 | Phase 5: Application Security | Pending |
 | APP-03 | Phase 5: Application Security | Pending |

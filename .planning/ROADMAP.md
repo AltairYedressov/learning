@@ -79,8 +79,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Portfolio Dockerfiles non-root user + Helm template security contexts
-- [ ] 04-02-PLAN.md -- EFK Elasticsearch + Kibana HelmRelease security context gap closure
+- [x] 04-01-PLAN.md -- Portfolio Dockerfiles non-root user + Helm template security contexts
+- [x] 04-02-PLAN.md -- EFK Elasticsearch + Kibana HelmRelease security context gap closure
 
 ### Phase 5: Application Security
 **Goal**: The backend API rejects malicious input and restricts cross-origin access
