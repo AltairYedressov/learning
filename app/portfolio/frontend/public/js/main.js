@@ -2,17 +2,8 @@
    PORTFOLIO — Main JavaScript
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── Sound state (module scope) ──────────────────────────────── */
-let soundEnabled = false;
-let audioUnlocked = false;
-let keyAudio = null;     // pool of HTMLAudioElements, lazily created
-let keyAudioIdx = 0;     // round-robin index into the pool
-let lastPlay = 0;        // throttle timestamp (performance.now)
-const KEY_THROTTLE_MS = 25;
-
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
-  initSound();
   initNav();
   initReveal();
   initCountUp();
@@ -22,57 +13,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initContactForm();
   setFooterYear();
 });
-
-/* ── Sound Toggle ─────────────────────────────────────────────── */
-function initSound() {
-  const toggle = document.getElementById("soundToggle");
-  if (!toggle) return;
-
-  const saved = localStorage.getItem("sound-enabled");
-  if (saved === "true") {
-    soundEnabled = true;
-    document.documentElement.setAttribute("data-sound", "on");
-  }
-  toggle.setAttribute("aria-pressed", String(soundEnabled));
-
-  toggle.addEventListener("click", async () => {
-    soundEnabled = !soundEnabled;
-    localStorage.setItem("sound-enabled", String(soundEnabled));
-    document.documentElement.setAttribute("data-sound", soundEnabled ? "on" : "off");
-    toggle.setAttribute("aria-pressed", String(soundEnabled));
-
-    // First time we enable sound, use this click as the user gesture to unlock audio.
-    if (soundEnabled && !audioUnlocked) {
-      try {
-        keyAudio = Array.from({ length: 4 }, () => {
-          const a = new Audio("/audio/keypress.mp3");
-          a.volume = 0.35;
-          a.preload = "auto";
-          return a;
-        });
-        const primer = keyAudio[0];
-        await primer.play();
-        primer.pause();
-        primer.currentTime = 0;
-        audioUnlocked = true;
-      } catch (_) {
-        // NotAllowedError or asset missing — silently leave audio locked.
-      }
-    }
-  });
-}
-
-/* ── Throttled key-press emitter ──────────────────────────────── */
-function playKey() {
-  if (!soundEnabled || !audioUnlocked || !keyAudio) return;
-  const now = performance.now();
-  if (now - lastPlay < KEY_THROTTLE_MS) return;
-  lastPlay = now;
-  const a = keyAudio[keyAudioIdx];
-  keyAudioIdx = (keyAudioIdx + 1) % keyAudio.length;
-  try { a.currentTime = 0; } catch (_) { /* ignore */ }
-  a.play().catch(() => { /* swallow autoplay rejections */ });
-}
 
 /* ── Theme Toggle ─────────────────────────────────────────────── */
 function initTheme() {
@@ -369,8 +309,6 @@ function initSkillsTerminal() {
     let i = 0;
     function tick() {
       i++;
-      const ch = text[i - 1];
-      if (ch && ch.trim()) playKey();
       typingEl.textContent = text.slice(0, i);
       if (i < text.length) setTimeout(tick, 35 + Math.random() * 20);
       else cb();
@@ -516,8 +454,6 @@ function initExpTerminals() {
     let i = 0;
     function tick() {
       i++;
-      const ch = text[i - 1];
-      if (ch && ch.trim()) playKey();
       typingEl.textContent = text.slice(0, i);
       if (i < text.length) setTimeout(tick, TYPE_SPEED + Math.random() * (TYPE_SPEED * 0.5));
       else cb();
