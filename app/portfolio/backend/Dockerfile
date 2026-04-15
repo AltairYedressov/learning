@@ -26,7 +26,7 @@ FROM python:3.12-slim-bookworm AS runtime
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH" \
-    BACKEND_PORT=5000
+    BACKEND_PORT=8000
 
 # Non-root principal (CONTEXT D-05: uid/gid 10001)
 RUN groupadd --system --gid 10001 app \
@@ -42,8 +42,8 @@ COPY --chown=app:app app.py ./
 
 USER app
 
-EXPOSE 5000
+EXPOSE 8000
 
 # gunicorn single-worker (CONTEXT D-04). Using shell form so ${BACKEND_PORT}
 # expands at container start time.
-CMD ["sh", "-c", "exec gunicorn -w 1 -b 0.0.0.0:${BACKEND_PORT:-5000} app:app"]
+CMD ["sh", "-c", "exec gunicorn -w 1 -b 0.0.0.0:${BACKEND_PORT:-8000} app:app"]
