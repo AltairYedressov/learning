@@ -81,8 +81,43 @@ Derived from `.planning/PROJECT.md`. REQ-IDs are stable handles used by ROADMAP.
 
 ## Traceability
 
-*Will be populated by the roadmapper — each REQ-ID maps to exactly one phase.*
+Every v1 REQ-ID maps to exactly one phase. 34/34 mapped.
 
 | REQ-ID | Phase | Plan |
 |--------|-------|------|
-| ...    | ...   | ...  |
+| PKG-01 | Phase 1 — Package & Local Verify | TBD |
+| PKG-02 | Phase 1 — Package & Local Verify | TBD |
+| PKG-03 | Phase 1 — Package & Local Verify | TBD |
+| PKG-04 | Phase 1 — Package & Local Verify | TBD |
+| PKG-05 | Phase 1 — Package & Local Verify | TBD |
+| APP-01 | Phase 1 — Package & Local Verify | TBD |
+| APP-02 | Phase 1 — Package & Local Verify | TBD |
+| APP-03 | Phase 1 — Package & Local Verify | TBD |
+| APP-04 | Phase 1 — Package & Local Verify | TBD |
+| APP-05 | Phase 1 — Package & Local Verify | TBD |
+| SEC-05 | Phase 1 — Package & Local Verify | TBD |
+| SEC-07 | Phase 1 — Package & Local Verify | TBD |
+| SMS-01 | Phase 2 — Secrets & CI Image Push | TBD |
+| SMS-02 | Phase 2 — Secrets & CI Image Push | TBD |
+| SMS-03 | Phase 2 — Secrets & CI Image Push | TBD |
+| SEC-02 | Phase 2 — Secrets & CI Image Push | TBD |
+| CI-01  | Phase 2 — Secrets & CI Image Push | TBD |
+| CI-02  | Phase 2 — Secrets & CI Image Push | TBD |
+| CI-03  | Phase 2 — Secrets & CI Image Push | TBD |
+| CI-04  | Phase 2 — Secrets & CI Image Push | TBD |
+| DEP-01 | Phase 3 — Chart, GitOps Deploy & Old-App Retirement | TBD |
+| DEP-02 | Phase 3 — Chart, GitOps Deploy & Old-App Retirement | TBD |
+| DEP-03 | Phase 3 — Chart, GitOps Deploy & Old-App Retirement | TBD |
+| DEP-04 | Phase 3 — Chart, GitOps Deploy & Old-App Retirement | TBD |
+| DEP-05 | Phase 3 — Chart, GitOps Deploy & Old-App Retirement | TBD |
+| SEC-01 | Phase 3 — Chart, GitOps Deploy & Old-App Retirement | TBD |
+| SEC-03 | Phase 3 — Chart, GitOps Deploy & Old-App Retirement | TBD |
+| SEC-04 | Phase 3 — Chart, GitOps Deploy & Old-App Retirement | TBD |
+| SEC-06 | Phase 3 — Chart, GitOps Deploy & Old-App Retirement | TBD |
+| VER-01 | Phase 4 — Production Verification & Cutover Close-Out | TBD |
+| VER-02 | Phase 4 — Production Verification & Cutover Close-Out | TBD |
+| VER-03 | Phase 4 — Production Verification & Cutover Close-Out | TBD |
+| VER-04 | Phase 4 — Production Verification & Cutover Close-Out | TBD |
+| VER-05 | Phase 4 — Production Verification & Cutover Close-Out | TBD |
+| VER-06 | Phase 4 — Production Verification & Cutover Close-Out | TBD |
+| VER-07 | Phase 4 — Production Verification & Cutover Close-Out | TBD |
