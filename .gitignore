@@ -19,3 +19,4 @@ override.tf.json
 
 # Ignore plan output
 *.plan
+interview-star-questions/**
