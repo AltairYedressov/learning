@@ -16,6 +16,7 @@ None.
 
 | ID | Slug | Description | Completed |
 |----|------|-------------|-----------|
+| 260415-q8z | add-terminal-typing-asmr-sound-synced-to | Terminal typing ASMR sound + sound toggle in nav | 2026-04-15 |
 
 ## Notes
 
