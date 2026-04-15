@@ -1,0 +1,37 @@
+# Default values for the portfolio chart (0.1.0 schema).
+# These are placeholders so `helm lint` and `helm template` succeed.
+# Real values are supplied by the HelmRelease in portfolio/base/helmrelease.yaml.
+
+namespace:
+  name: portfolio
+
+replicas:
+  api: 2
+  frontend: 2
+
+images:
+  api: 372517046622.dkr.ecr.us-east-1.amazonaws.com/images/portfolio-backend:5e83c60
+  frontend: 372517046622.dkr.ecr.us-east-1.amazonaws.com/images/portfolio-frontend:5e83c60
+
+ports:
+  api: 8000
+  frontend: 3000
+
+api:
+  url: "http://portfolio-api.portfolio.svc.cluster.local:8000"
+
+resources:
+  api:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  frontend:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
