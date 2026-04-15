@@ -1,235 +1,108 @@
-# Testing Patterns
+# Testing
 
-**Analysis Date:** 2026-03-28
+## Framework
 
-## Test Framework
+- **pytest** — Python backend test framework
+- **fastapi.testclient.TestClient** — In-process HTTP client (no real server needed)
+- No JavaScript/frontend test suite present
+- No Terraform/infrastructure test framework (no terratest, kitchen-terraform)
+- No Helm chart test framework (no helm-unittest)
 
-**Current State:**
-- No test files detected in the application code
-- No test runner configuration found (no `jest.config.js`, `vitest.config.js`, `pytest.ini`)
-- No testing dependencies in `package.json` or `requirements.txt`
+## Test Location
 
-**Frameworks Available:**
-- JavaScript/Node.js: Could use Jest, Vitest, or Mocha
-- Python: Could use pytest, unittest, or hypothesis
+- `app/backend/tests/` — Python backend tests
+  - `app/backend/tests/__init__.py` — Package marker
+  - `app/backend/tests/test_security.py` — Security-focused integration tests
 
-**Recommendation:**
-- For `app/frontend/src/server.js`: Jest with supertest for Express integration testing
-- For `app/backend/main.py`: pytest with fastapi.testclient for API testing
+## Run Commands
 
-## Application Architecture Overview
-
-Understanding the codebase structure for future testing implementation:
-
-**Frontend (`app/frontend/src/server.js`):**
-- Express.js application with two main routes
-- `/` - Main route that fetches data from backend API and renders template
-- `/health` - Health check endpoint
-- Error handling via try-catch blocks
-- Dependencies: express, axios, ejs
-
-**Backend (`app/backend/main.py`):**
-- FastAPI application with 6 RESTful endpoints
-- `/api/health` - Health check with HealthCheck model
-- `/api/profile` - Returns Profile model
-- `/api/skills` - Returns List[Skill]
-- `/api/experience` - Returns List[Experience]
-- `/api/certifications` - Returns List[Certification]
-- `/api/projects` - Returns List[Project]
-- `/api/all` - Aggregated endpoint returning all data as dictionary
-- CORS middleware enabled for all origins
-- Dependencies: fastapi, uvicorn, pydantic
-
-## Test Strategy (Not Yet Implemented)
-
-### Unit Tests
-
-**Frontend (JavaScript):**
-- Test route handlers independently with mocked axios
-- Mock patterns: Jest mock for axios HTTP requests
-- Mock API responses to test both success and failure paths
-- Assertions on response status codes and rendered templates
-
-Example test structure (not yet in codebase):
-```javascript
-describe('GET /', () => {
-  it('should render index with data from backend', async () => {
-    // Mock axios to return sample data
-    // Assert res.render called with correct data
-  });
-
-  it('should handle backend API failure', async () => {
-    // Mock axios to throw error
-    // Assert 503 status and error template rendered
-  });
-});
+```bash
+# From app/backend/ or project root:
+pytest app/backend/tests/
+# Or directly:
+cd app/backend && pytest tests/
 ```
 
-**Backend (Python):**
-- Test endpoint handlers return correct Pydantic models
-- Test model validation with pytest
-- Test CORS middleware configuration
-- Assertions on response schemas and status codes
+No pytest config (`pytest.ini`, `pyproject.toml`, `setup.cfg`) present — relies on defaults.
 
-Example test structure (not yet in codebase):
+## Structure
+
+- **Single file**, categorized via ASCII section headers matching backend style:
+  - `# ── CORS Tests ──────────────────────────────────────────────────────────────`
+  - `# ── Rate Limiting Tests ────────────────────────────────────────────────────`
+  - `# ── Body Size Tests ─────────────────────────────────────────────────────────`
+  - `# ── 404 Handling Tests ──────────────────────────────────────────────────────`
+- Test function names: `test_<behavior>_<expected_outcome>` (e.g., `test_cors_rejects_unauthorized_origin`, `test_oversized_body_rejected`)
+- Docstrings describe the behavior in plain English on the first line
+
+## Pattern Example
+
 ```python
-def test_get_profile():
-    response = client.get("/api/profile")
-    assert response.status_code == 200
-    assert response.json()["name"] == "Altair Yedressov"
-
-def test_health_check():
-    response = client.get("/api/health")
-    assert response.status_code == 200
-    assert response.json()["status"] == "healthy"
+def test_cors_rejects_unauthorized_origin():
+    """GET /api/profile with Origin: https://evil.com must NOT echo that origin back."""
+    response = client.get("/api/profile", headers={"Origin": "https://evil.com"})
+    acao = response.headers.get("access-control-allow-origin")
+    assert acao != "https://evil.com" and acao != "*", (
+        f"Expected CORS to reject evil.com, but got access-control-allow-origin: {acao}"
+    )
 ```
 
-### Integration Tests
+## Path Bootstrapping
 
-**Frontend:**
-- Test full request flow from route handler to template rendering
-- Use supertest to make real HTTP requests to Express app
-- Test error scenarios (backend unreachable)
+Tests insert the parent directory into `sys.path` so `from main import app` works regardless of the invocation CWD:
 
-**Backend:**
-- Test endpoint interactions (e.g., verify `/api/all` aggregates data correctly)
-- Use FastAPI's TestClient to make test requests
-
-### Error Path Testing
-
-**Frontend:**
-- Test axios failure scenarios (timeout, 500 error, connection refused)
-- Verify 503 status code returned
-- Verify error template rendered with appropriate message
-
-**Backend:**
-- Pydantic validation failures already handled by framework
-- Test invalid request paths return 404
-
-## Mocking Strategy (For Future Implementation)
-
-**Frontend Mocking:**
-- Jest mocks for axios: `jest.mock('axios')`
-- Mock return values: `axios.get.mockResolvedValue({ data: {...} })`
-- Mock errors: `axios.get.mockRejectedValue(new Error('...'))`
-- Template rendering: Mock or test actual ejs rendering
-
-**Backend Mocking:**
-- FastAPI TestClient - no external mocking needed for unit tests
-- Mock datetime for consistent timestamp testing if needed
-- CORS middleware testing: Verify headers on OPTIONS requests
-
-## Coverage Targets (Recommended)
-
-**Frontend:**
-- Route handlers: 100% - Small functions, critical for service
-- Error paths: 100% - Must verify 503 responses work
-- Axios integration: 80%+ - Mock external API calls
-
-**Backend:**
-- Endpoint handlers: 100% - Simple pass-through functions
-- Model validation: 100% - Pydantic handles this
-- Health check: 100% - Critical for Kubernetes probes
-
-**Current State:**
-- No coverage reported - testing not yet implemented
-
-## Test Organization (Recommended Structure)
-
-**Frontend:**
-- Location: `app/frontend/test/` or `app/frontend/__tests__/`
-- Naming: `*.test.js` or `*.spec.js`
-- Structure: One file per route or feature
-
-**Backend:**
-- Location: `app/backend/test/` or `app/backend/tests/`
-- Naming: `test_*.py` or `*_test.py`
-- Structure: One file per module or feature
-
-## Run Commands (To Be Implemented)
-
-**Frontend (once configured):**
-```bash
-npm test                   # Run all tests
-npm test -- --watch       # Watch mode
-npm test -- --coverage    # Coverage report
+```python
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from main import app
 ```
 
-**Backend (once configured):**
-```bash
-pytest                     # Run all tests
-pytest -v                  # Verbose output
-pytest --cov=app          # Coverage report
-pytest -k health          # Run specific test
-```
+## Mocking Approach
 
-## Health Check Testing
+- **No mocking libraries in use** — no `unittest.mock`, no `pytest-mock`, no `responses`
+- Tests exercise the real FastAPI app in-process via `TestClient`
+- No external dependencies to mock (backend is stateless, data is hardcoded)
 
-**Frontend (`app/frontend/src/server.js` line 32-47):**
-- GET `/health` endpoint exists and returns JSON
-- Returns degraded status if backend unreachable
-- Structure:
-  ```javascript
-  {
-    status: "healthy" | "degraded",
-    service: "portfolio-frontend",
-    backend: { /* backend response */ } | "unreachable"
-  }
-  ```
-- Used by Kubernetes liveness/readiness probes
+## Fixtures
 
-**Backend (`app/backend/main.py` line 153-160):**
-- GET `/api/health` endpoint returns HealthCheck model
-- Response includes: status, service, version, timestamp
-- Used by Kubernetes liveness/readiness probes in Helm chart (`HelmCharts/portfolio/templates/01-backend.yaml` line 33-44)
+- No `conftest.py` present
+- No `@pytest.fixture` definitions
+- Shared state: single module-level `client = TestClient(app)` reused by all tests
 
-## Kubernetes Integration (Relevant for Testing)
+## Coverage
 
-**Helm Chart Health Probe Configuration:**
-- Location: `HelmCharts/portfolio/templates/01-backend.yaml`
-- Liveness probe: checks `/api/health` every 15 seconds after 10s delay
-- Readiness probe: checks `/api/health` every 10 seconds after 5s delay
-- Tests must ensure health endpoints respond within probe timeouts
+- **Not measured** — no coverage tool configured (no `.coveragerc`, no `pytest-cov` in deps)
+- No CI coverage gate
+- Scope is intentional: these are **security regression tests** for phase-05 hardening, not broad unit coverage
 
-**Frontend Probe Configuration:**
-- Location: `HelmCharts/portfolio/templates/02-frontend.yaml`
-- Similar probes configured for `/health` endpoint
+## Test Inventory (7 tests)
 
-## Testing Best Practices for This Codebase
+| Test | Purpose |
+|------|---------|
+| `test_cors_rejects_unauthorized_origin` | CORS rejects `https://evil.com` |
+| `test_cors_allows_authorized_origin` | CORS allows `https://yedressov.com` |
+| `test_cors_allows_localhost_origin` | CORS allows `http://localhost:3000` (dev) |
+| `test_rate_limit_returns_429` | 61st request to `/api/profile` returns 429 |
+| `test_health_exempt_from_rate_limit` | 70 requests to `/api/health` all 200 |
+| `test_oversized_body_rejected` | POST > 1024 bytes returns 413 |
+| `test_unknown_path_returns_404` | Unknown path returns 404 with `detail` JSON |
 
-**For Frontend:**
-1. Always mock axios calls - never make real HTTP requests in tests
-2. Test both success and error paths for API integration
-3. Verify correct HTTP status codes returned to client
-4. Test template rendering with sample data
+## Test Types Present
 
-**For Backend:**
-1. Use FastAPI TestClient for all endpoint tests
-2. Test Pydantic model validation
-3. Verify CORS headers on responses
-4. Test health check timestamp is set
+- **Integration tests** (in-process HTTP via TestClient) — all 7 tests
+- **Unit tests** — none
+- **E2E tests** (real cluster, real NLB) — none automated; manual smoke via curl
+- **Infrastructure tests** — none (Terraform plan/apply serves as validation)
 
-**For Both:**
-1. Test health check endpoints thoroughly - critical for production
-2. Verify error messages are appropriate
-3. Test environment variable fallbacks (PORT, API_URL)
-4. Integration tests should verify service-to-service communication
+## CI Integration
 
-## Current Code Readiness for Testing
+- `.github/workflows/` exists but tests are **not wired into CI** — no pytest invocation in deploy pipeline
+- Tests must be run manually before commits
 
-**Frontend (`app/frontend/src/server.js`):**
-- Easily testable: Route handlers are pure functions with clear inputs/outputs
-- Uses middleware pattern compatible with supertest
-- Error handling patterns are testable
-- Dependencies (axios, express, ejs) all have mature testing libraries
+## Gaps
 
-**Backend (`app/backend/main.py`):**
-- Highly testable: Endpoints use Pydantic response models
-- FastAPI has excellent built-in testing support
-- CORS middleware easy to verify
-- Data is hardcoded (no database) - tests can run without external dependencies
-- Type hints enable property-based testing with hypothesis
-
----
-
-*Testing analysis: 2026-03-28*
+- No frontend tests (Express server untested)
+- No contract tests between frontend ↔ backend
+- No chart-rendering tests (Helm templates unvalidated)
+- No Terraform plan-diff tests
+- No coverage enforcement
+- No CI gate — tests can regress silently

@@ -1,134 +1,101 @@
-# External Integrations
+# Integrations
 
-**Analysis Date:** 2026-03-28
+External systems, APIs, managed services, and inter-service dependencies.
 
-## APIs & External Services
+## AWS Managed Services
 
-**Inter-Service Communication:**
-- Portfolio Backend API - REST endpoints serving resume data
-  - SDK/Client: axios 1.7.0 (HTTP client in frontend)
-  - URL configuration: `API_URL` environment variable
-  - Health endpoint: `/api/health` for liveness/readiness checks
-  - Data endpoints: `/api/all`, `/api/profile`, `/api/skills`, `/api/experience`, `/api/certifications`, `/api/projects`
+Provisioned via Terraform in `terraform-infra/root/dev/`:
 
-**CORS Configuration:**
-- FastAPI middleware configured to allow all origins (`allow_origins=["*"]`)
-- Location: `/Users/altairyedressov/School/finale/learning/app/backend/main.py` lines 18-24
+| Service | Module | Purpose |
+|---------|--------|---------|
+| **VPC / Networking** | `terraform-infra/root/dev/networking/` | VPC, public/private subnets, IGW, route tables, security groups |
+| **EKS** | `terraform-infra/root/dev/eks/` | Managed Kubernetes control plane + managed node group |
+| **IAM** | `terraform-infra/root/dev/iam-roles/` | Service roles, IRSA roles for platform-tools, GitHub OIDC provider |
+| **S3** | `terraform-infra/root/dev/s3/` | Terraform state backend (`${ACCOUNT_ID}-terraform-state-dev`), Thanos long-term metrics, Velero backups |
+| **RDS / Aurora** | `terraform-infra/root/dev/database/` | Postgres-compatible DB (dev) with password in Secrets Manager |
+| **ECR** | `terraform-infra/root/dev/ecr/` | Container registry for frontend + backend images |
+| **Route 53** | `terraform-infra/root/dev/dns/` | DNS for `yedressov.com` → NLB alias |
+| **ACM** | Via DNS stack | TLS certificate for NLB (HTTPS termination at edge) |
+| **AWS Secrets Manager** | Via database stack | RDS password storage |
+| **NLB** | Provisioned by AWS Load Balancer Controller | Ingress traffic → Istio Gateway |
 
-## Data Storage
+## Platform Tools (In-Cluster)
 
-**Databases:**
-- AWS RDS/Aurora (provisioned via Terraform)
-  - Terraform config: `/Users/altairyedressov/School/finale/learning/terraform-infra/database/main.tf`
-  - Features: Multi-AZ deployment, automated backups, encryption at rest (KMS), IAM authentication support
-  - Connection details managed via Terraform variables and AWS Secrets Manager
+Deployed as HelmReleases under `platform-tools/`, reconciled by Flux:
 
-**File Storage:**
-- AWS S3 bucket (provisioned via Terraform)
-  - Terraform config: `/Users/altairyedressov/School/finale/learning/terraform-infra/s3/s3.tf`
-  - Purpose: Object storage for static assets and data
+| Tool | Path | Role |
+|------|------|------|
+| **Istio** | `platform-tools/istio/` | Service mesh — Gateway (Envoy ingress), VirtualServices, automatic mTLS |
+| **AWS Load Balancer Controller** | `platform-tools/aws-lb-controller/` | Provisions AWS NLB for Istio ingress Service |
+| **Karpenter** | `platform-tools/karpenter/` | Node autoscaling based on pending pods |
+| **Sealed Secrets** | `platform-tools/sealed-secrets/` | Encrypt secrets for safe Git commit |
+| **Velero** | `platform-tools/velero/` | Cluster backup/restore, S3 backend |
+| **EFK Logging** | `platform-tools/efk-logging/` | Elasticsearch, Fluentd, Kibana — centralized logs |
+| **EKS Monitoring** | `platform-tools/eks-monitoring/` | Prometheus + Grafana |
+| **Thanos** | `platform-tools/thanos/` | Long-term metrics storage on S3 |
+| **Kyverno** | `platform-tools/kyverno/` | Policy engine (admission control) |
+| **kube-system** | `platform-tools/kube-system/` | Core-dns and kube-system customizations |
 
-**Caching:**
-- Not currently integrated (stateless applications)
+## GitOps Source-of-Truth
 
-## Authentication & Identity
+- **FluxCD** (`clusters/dev-projectx/`) reconciles Git → cluster every 10m
+- **GitHub repo** — source of manifests; requires a GitHub PAT passed as Terraform variable to bootstrap Flux
+- **Kustomization / HelmRelease CRDs** — declarative deployment definitions
 
-**Auth Provider:**
-- Custom - No external identity provider
-- IAM authentication available for RDS database access via Terraform configuration (`iam_database_authentication_enabled`)
-- AWS IAM roles for Kubernetes service accounts (IRSA) via Terraform
+## CI/CD
 
-**AWS IAM:**
-- Role provisioning automation via Terraform (`/Users/altairyedressov/School/finale/learning/terraform-infra/iam-role-module/`)
-- Permission boundary policies for least-privilege access
-- Service-to-service authentication via EKS pod identity
+- **GitHub Actions** (`.github/workflows/deploy-workflow.yaml`) — pipeline for Terraform plan/apply + Docker build/push to ECR
+- **OIDC federation** — GitHub Actions authenticates to AWS via OIDC provider (no long-lived AWS keys)
 
-## Monitoring & Observability
+## Inter-Service Communication
 
-**Error Tracking:**
-- Health check endpoints on both services:
-  - Frontend: `GET /health` on port 3000
-  - Backend: `GET /api/health` on port 8000
-- Kubernetes liveness/readiness probes configured in Helm templates
+| From | To | Protocol | Notes |
+|------|-----|----------|-------|
+| Browser | NLB (`yedressov.com`) | HTTPS (TLS 1.2+, ACM cert) | Public entry |
+| NLB | Istio Gateway (Envoy) | HTTP (cluster-internal) | 8080 HTTP→HTTPS redirect, 8443 passthrough |
+| Istio Gateway | Frontend Service | HTTP (mTLS via Istio sidecars) | Path-based routing; default route |
+| Istio Gateway | Backend Service | HTTP (mTLS) | `/api` prefix → `portfolio-api:8000` |
+| Frontend pod | Backend pod | HTTP (mTLS) | `API_URL` env → `http://portfolio-api:8000` |
+| Backend pod | (none — stateless) | — | Resume data hardcoded; no DB reads in current code |
 
-**Logs:**
-- EFK Stack (Elasticsearch, Fluent Bit, Kibana) deployed via FluxCD
-  - Kustomization: `/Users/altairyedressov/School/finale/learning/clusters/dev-projectx/efk-logging.yaml`
-- Container logs streamed to ELK for centralized logging
+## Data Stores
 
-**Monitoring Stack:**
-- Prometheus + Grafana deployed via FluxCD
-  - Kustomization: `/Users/altairyedressov/School/finale/learning/clusters/dev-projectx/monitoring.yaml`
-- Thanos deployed for long-term metrics storage
-  - Kustomization: `/Users/altairyedressov/School/finale/learning/clusters/dev-projectx/thanos.yaml`
-- Alertmanager for alert routing and notifications
+- **Application data**: hardcoded in `app/backend/main.py` (PROFILE, SKILLS, EXPERIENCE, CERTIFICATIONS, PROJECTS). No runtime DB access.
+- **RDS**: provisioned but not yet consumed by the backend (future use).
+- **S3 buckets**: infra state, Thanos metrics, Velero backups — not accessed by application code.
 
-## CI/CD & Deployment
+## Authentication & Authorization
 
-**Hosting:**
-- AWS EKS (Elastic Kubernetes Service)
-  - Cluster provisioned via Terraform: `/Users/altairyedressov/School/finale/learning/terraform-infra/eks-cluster/`
-  - Multi-node setup with Karpenter-based autoscaling
-  - Running on dev cluster in `dev-projectx` namespace
+| Surface | Mechanism |
+|---------|-----------|
+| GitHub Actions → AWS | OIDC (no static creds) |
+| Platform-tools pods → AWS APIs | IRSA (IAM Roles for Service Accounts) |
+| Flux → GitHub | GitHub PAT (Terraform variable) |
+| Pod ↔ Pod | Istio automatic mTLS (`enableAutoMtls: true`) |
+| User → Site | None (public portfolio — no auth layer) |
+| Backend `/api/*` | None (public read-only endpoints) |
 
-**CI Pipeline:**
-- GitHub Actions - CI/CD orchestration
-- Container images pushed to AWS ECR (Elastic Container Registry)
-  - ECR configured via Terraform: `/Users/altairyedressov/School/finale/learning/terraform-infra/ecr/`
+## Observability Endpoints
 
-**GitOps:**
-- FluxCD v1.8 - GitOps continuous deployment
-  - Watches this GitHub repository for changes
-  - Automatically reconciles cluster state with Git
-  - Kustomization configurations: `/Users/altairyedressov/School/finale/learning/clusters/`
-  - Sync interval: 10 minutes for most resources
+- `GET /health` (backend) — Kubernetes readiness/liveness probe
+- `GET /health` (frontend Express) — K8s probe
+- Prometheus scrapes Envoy sidecars, kubelet, node_exporter
+- Fluentd tails pod stdout → Elasticsearch
+- Grafana dashboards consume Prometheus + Thanos
 
-**Service Mesh:**
-- Istio - Traffic management and ingress routing
-  - Deployment: `/Users/altairyedressov/School/finale/learning/clusters/dev-projectx/istio.yaml`
-  - VirtualService routes traffic to portfolio services: `/Users/altairyedressov/School/finale/learning/portfolio/base/virtualservice.yaml`
-  - Domain: yedressov.com (configured in VirtualService)
+## No External SaaS APIs
 
-**Load Balancing:**
-- AWS Load Balancer Controller deployed via FluxCD
-  - Kustomization: `/Users/altairyedressov/School/finale/learning/clusters/dev-projectx/aws-lb-controller.yaml`
-  - Manages AWS NLB/ALB for Kubernetes services
+The application does **not** call third-party APIs at runtime (no Stripe, Auth0, Sentry, analytics, email providers, etc.). All integrations are AWS-internal or in-cluster.
 
-**Disaster Recovery:**
-- Velero for Kubernetes cluster backups
-  - Deployment: `/Users/altairyedressov/School/finale/learning/clusters/dev-projectx/velero.yaml`
-- AWS RDS automated backups with retention policies
+## Secrets Flow
 
-**Secrets Management:**
-- Sealed Secrets for encrypted secrets in Git
-  - Deployment: `/Users/altairyedressov/School/finale/learning/clusters/dev-projectx/sealed-secrets.yaml`
-- AWS Secrets Manager for sensitive credentials
+1. RDS password generated by Terraform → written to AWS Secrets Manager
+2. Flux-managed Sealed Secrets encrypt per-cluster secrets (GitHub PAT, chart values) for safe commit
+3. IRSA tokens rotated automatically by EKS (no stored creds in pods)
 
-## Environment Configuration
+## Known Integration Risks
 
-**Required env vars (Frontend):**
-- `PORT` - HTTP server port (default: 3000)
-- `API_URL` - Backend API URL (default: http://localhost:8000)
-
-**Required env vars (Backend):**
-- None explicitly required (serves static data, no external API calls)
-
-**Secrets location:**
-- AWS Secrets Manager - Primary secret storage
-- Sealed Secrets in Git - Kubernetes secrets encrypted at rest
-- Environment variables injected via Kubernetes ConfigMaps and Secrets
-
-## Webhooks & Callbacks
-
-**Incoming:**
-- GitHub webhooks trigger FluxCD reconciliation when Git repository updates
-- Kubernetes Admission webhooks via Istio (mutual TLS validation)
-
-**Outgoing:**
-- FluxCD updates Kubernetes cluster state via Kubernetes API
-- AWS SNS notifications for infrastructure alerts (configured in Terraform)
-- Health check probes from Kubernetes to application endpoints
-
----
-
-*Integration audit: 2026-03-28*
+- **Flux → GitHub PAT** is long-lived and passed as TF variable (rotation burden)
+- **Backend → RDS** wiring not yet present in code; schema, migrations, and connection pooling TBD
+- **No circuit breakers** between frontend and backend — upstream failure returns 503 via `error.ejs`
+- **No cross-region or multi-AZ** concerns documented (dev is single-region)
