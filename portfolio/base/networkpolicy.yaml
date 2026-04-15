@@ -13,14 +13,14 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow frontend pods to reach backend API
+    # Allow web pods to reach backend API
     - from:
         - podSelector:
             matchLabels:
-              app: portfolio-frontend
+              app: portfolio-web
       ports:
         - protocol: TCP
-          port: 8000
+          port: 5000
     # Allow Istio ingress gateway (for /api routes via VirtualService)
     - from:
         - namespaceSelector:
@@ -28,7 +28,7 @@ spec:
               kubernetes.io/metadata.name: istio-ingress
       ports:
         - protocol: TCP
-          port: 8000
+          port: 5000
     # Allow Prometheus metrics scraping via Istio sidecar
     - from:
         - namespaceSelector:
@@ -58,18 +58,22 @@ spec:
       ports:
         - protocol: TCP
           port: 15012
+    # SMTP egress to Gmail (contact form)
+    - ports:
+        - protocol: TCP
+          port: 587
 ---
-# Default-deny all ingress/egress to portfolio-frontend,
+# Default-deny all ingress/egress to portfolio-web,
 # then allow only what it strictly needs.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: portfolio-frontend
+  name: portfolio-web
   namespace: portfolio
 spec:
   podSelector:
     matchLabels:
-      app: portfolio-frontend
+      app: portfolio-web
   policyTypes:
     - Ingress
     - Egress
@@ -97,14 +101,14 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-    # Backend API (per D-12: frontend only talks to backend)
+    # Backend API (web only talks to api)
     - to:
         - podSelector:
             matchLabels:
               app: portfolio-api
       ports:
         - protocol: TCP
-          port: 8000
+          port: 5000
     # istiod xDS configuration
     - to:
         - namespaceSelector:
