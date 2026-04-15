@@ -20,7 +20,7 @@ resource "github_branch_protection_v3" "main" {
   enforce_admins = false
 
   required_status_checks {
-    strict = false
+    strict   = false
     contexts = [
       "publish-images",
       "terraform (iam-roles)",
