@@ -35,3 +35,8 @@ variable "karpenter_irsa_role" {
   type    = string
   default = "karpenter_irsa_role"
 }
+
+variable "image_reflector_irsa_role" {
+  type    = string
+  default = "image-reflector-role"
+}
