@@ -37,7 +37,12 @@
   3. A push to `main` that touches `app/portfolio/**` triggers a GitHub Actions workflow that builds both images and pushes them to the `portfolio-web` and `portfolio-api` ECR repos, tagged with both `latest` and the commit SHA.
   4. The Actions run fails fast on build errors and surfaces the resulting image digests in the job summary.
   5. Image promotion into the cluster is wired — either via Flux image automation watching the new ECR repos or via explicit Helm value bumps on release.
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 02-01-ecr-repos-PLAN.md — Create portfolio-web + portfolio-api ECR repos with IMMUTABLE tags and lifecycle policy
+- [ ] 02-02-iam-policies-PLAN.md — ECR push policy for GitHub Actions role + IRSA role for Flux image-reflector
+- [ ] 02-03-github-actions-workflow-PLAN.md — portfolio-images.yaml builds and pushes both images on main
+- [ ] 02-04-flux-image-automation-PLAN.md — Flux ImageRepository/ImagePolicy/ImageUpdateAutomation for tag promotion
+- [ ] 02-05-sealed-secret-PLAN.md — SealedSecret template + kubeseal seal/rotate documentation
 
 ### Phase 3: Chart, GitOps Deploy & Old-App Retirement
 **Goal**: Flux deploys the new `portfolio-web` + `portfolio-api` workloads with the sealed SMTP secret mounted, Istio routes traffic to them, and the old FastAPI/EJS app is gone from the cluster.
@@ -68,6 +73,6 @@
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Package & Local Verify | 0/? | Not started | - |
-| 2. Secrets & CI Image Push | 0/? | Not started | - |
+| 2. Secrets & CI Image Push | 0/5 | Not started | - |
 | 3. Chart, GitOps Deploy & Old-App Retirement | 0/? | Not started | - |
 | 4. Production Verification & Cutover Close-Out | 0/? | Not started | - |
