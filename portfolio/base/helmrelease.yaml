@@ -8,6 +8,7 @@ spec:
   chart:
     spec:
       chart: portfolio
+      version: "0.1.0"
       sourceRef:
         kind: HelmRepository
         name: ecr-charts
