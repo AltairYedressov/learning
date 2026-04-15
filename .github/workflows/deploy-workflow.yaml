@@ -28,8 +28,9 @@ jobs:
     runs-on: ubuntu-22.04
 
     strategy:
+      fail-fast: false
       matrix:
-        stack: [eks]
+        stack: [iam-roles, ecr, eks]
 
     defaults:
       run:
