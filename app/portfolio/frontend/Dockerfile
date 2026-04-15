@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1.7
+# retrigger: 2026-04-15
 FROM node:20-alpine
 
 ENV NODE_ENV=production \
