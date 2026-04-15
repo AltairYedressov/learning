@@ -1,0 +1,32 @@
+# VCS
+.git
+.gitignore
+
+# Node artifacts — we reinstall inside the builder stage
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Env / secrets
+.env
+.env.*
+
+# Tests & dev artifacts
+tests/
+*.test.js
+coverage/
+
+# Repo-level noise
+.planning/
+terraform-infra/
+clusters/
+platform-tools/
+HelmCharts/
+.github/
+*.md
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
