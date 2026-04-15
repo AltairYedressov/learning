@@ -6,3 +6,5 @@ resources:
   - helmrepository.yaml
   - helmrelease.yaml
   - grafana-sealed-secret.yaml
+  - peerauthentication.yaml
+  - networkpolicy.yaml

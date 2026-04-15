@@ -1,0 +1,70 @@
+# Default-deny all ingress/egress to monitoring stack,
+# then allow only what it strictly needs.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: monitoring
+  namespace: monitoring
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow Istio ingress gateway (for Grafana UI access)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-ingress
+      ports:
+        - protocol: TCP
+          port: 3000
+    # Allow internal Prometheus/Grafana communication
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 9090
+        - protocol: TCP
+          port: 3000
+  egress:
+    # DNS resolution
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Scrape metrics from all namespaces (Prometheus)
+    # Needs wide egress to reach kubelet (10250), Envoy stats (15090),
+    # application metrics, node-exporter, etc.
+    - ports:
+        - protocol: TCP
+          port: 9090
+        - protocol: TCP
+          port: 10250
+        - protocol: TCP
+          port: 15090
+        - protocol: TCP
+          port: 15014
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8081
+        - protocol: TCP
+          port: 8000
+    # kube-apiserver (for service discovery, recording rules)
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443
+    # Thanos sidecar to S3 (HTTPS)
+    # Already covered by port 443 above
+    # istiod xDS (if sidecar-injected)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15012

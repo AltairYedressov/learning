@@ -1,0 +1,44 @@
+# Default-deny all ingress/egress to istiod,
+# then allow only what it strictly needs.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: istiod
+  namespace: istio-system
+spec:
+  podSelector:
+    matchLabels:
+      app: istiod
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow xDS connections from all Istio-injected namespaces
+    - ports:
+        - protocol: TCP
+          port: 15012
+    # Allow webhook calls from kube-apiserver (admission webhooks)
+    - ports:
+        - protocol: TCP
+          port: 15017
+    # Allow Prometheus metrics scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 15014
+  egress:
+    # DNS resolution
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # kube-apiserver (for config watches, webhook registration)
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443

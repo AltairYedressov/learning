@@ -29,6 +29,18 @@ variable "rules" {
   default = []
 }
 
+variable "egress_rules" {
+  type = list(object({
+    cidr       = string
+    from_port  = number
+    to_port    = number
+    protocol   = optional(string, "tcp")
+    ip_version = optional(string, "ipv4")
+  }))
+  default     = []
+  description = "List of egress rules for the security group. Empty list means no explicit egress."
+}
+
 variable "environment" {
   type = string
 }

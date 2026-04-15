@@ -1,0 +1,4 @@
+# .trivyignore - CVE exceptions for Trivy scanning
+# Each line is a CVE ID to ignore
+# Include justification as comments above each entry
+# Reviewed in PRs -- all exceptions must have documented rationale

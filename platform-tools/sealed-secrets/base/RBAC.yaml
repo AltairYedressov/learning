@@ -1,6 +1,14 @@
-# Restrict who can read/update SealedSecrets CRs in the cluster.
-# The controller's own RBAC is created by the Helm chart.
-# This adds an ops-team ClusterRole for read-only inspection.
+# -- Sealed Secrets Reader RBAC -----------------------------------------------
+# Purpose: Allow platform-ops group to inspect SealedSecret custom resources
+# without granting access to decrypted Secret objects.
+# The controller's own RBAC (created by Helm chart) handles encryption/decryption.
+#
+# Security justification (Phase 7 IAM-01 audit):
+#   - ClusterRole grants GET/LIST/WATCH on SealedSecrets CRs only
+#   - No access to core "secrets" API -- prevents reading decrypted values
+#   - Bound to "platform-ops" group -- scoped to authenticated ops members
+#   - Read-only verbs only -- no create/update/delete/patch
+# --------------------------------------------------------------------------
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -14,6 +22,10 @@ rules:
   # Do NOT grant "secrets" verbs here — the controller is the only
   # actor that should be able to read the decrypted Secret objects.
 ---
+# Binding: sealed-secrets-reader-binding
+# Justification: Maps sealed-secrets-reader ClusterRole to platform-ops group.
+# This is the only custom (non-Helm) ClusterRoleBinding in the cluster.
+# Grants read-only SealedSecret CR access -- no privilege escalation risk.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:

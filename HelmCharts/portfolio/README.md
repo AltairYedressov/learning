@@ -174,3 +174,105 @@ resources:
 ```
 
 > **Tip:** `100m` means 100 "millicores" = 0.1 of a CPU core. `128Mi` means 128 mebibytes (~134 MB). These are Kubernetes resource units.
+
+---
+
+## SMTP Sealed Secret (portfolio-smtp)
+
+The chart ships a `SealedSecret` at `templates/sealed-secret.yaml` that the in-cluster
+[sealed-secrets](https://github.com/bitnami-labs/sealed-secrets) controller decrypts to
+a Kubernetes `Secret` named `portfolio-smtp` in the `portfolio` namespace. Phase 3 of
+the deployment will wire this Secret into the backend Deployment via
+`envFrom.secretRef: { name: portfolio-smtp }`.
+
+Only the cluster controller holds the private key — the ciphertext committed in Git is
+safe to publish. **Plaintext credentials MUST NEVER be committed.**
+
+### Prerequisites
+
+- `kubeseal` CLI installed locally — https://github.com/bitnami-labs/sealed-secrets/releases
+- `kubectl` context pointed at the `dev-projectx` cluster
+- Gmail account with 2-factor authentication enabled
+
+### 1. Generate a Gmail App Password
+
+1. Visit https://myaccount.google.com/apppasswords
+2. App name: `portfolio-dev` (or similar descriptive label)
+3. Copy the 16-character password. Treat it as a secret — it grants SMTP send access.
+
+### 2. Fetch the sealed-secrets controller public cert
+
+```bash
+kubeseal --controller-namespace sealed-secrets \
+         --controller-name sealed-secrets \
+         --fetch-cert > /tmp/sealed-secrets-pub.pem
+```
+
+### 3. Create the plaintext Secret LOCALLY (never commit)
+
+```bash
+cat > /tmp/smtp-secret.yaml <<'EOF'
+apiVersion: v1
+kind: Secret
+metadata:
+  name: portfolio-smtp
+  namespace: portfolio
+type: Opaque
+stringData:
+  SMTP_USER: "contact@yedressov.com"
+  SMTP_PASS: "<paste 16-char app password>"
+  RECIPIENT_EMAIL: "contact@yedressov.com"
+EOF
+```
+
+### 4. Seal it
+
+```bash
+kubeseal --cert /tmp/sealed-secrets-pub.pem \
+         --format yaml \
+         < /tmp/smtp-secret.yaml \
+         > HelmCharts/portfolio/templates/sealed-secret.yaml
+```
+
+This replaces the committed placeholder (`__REPLACE_VIA_KUBESEAL__`) with the real
+ciphertext. Each value becomes a long base64 string (~350+ chars).
+
+### 5. Verify no plaintext remains and shred scratch files
+
+```bash
+shred -u /tmp/smtp-secret.yaml /tmp/sealed-secrets-pub.pem
+# placeholder gone:
+! grep -q '__REPLACE_VIA_KUBESEAL__' HelmCharts/portfolio/templates/sealed-secret.yaml
+# ciphertext present (base64 blobs >=100 chars):
+grep -E 'SMTP_PASS:.*[A-Za-z0-9+/=]{100,}' HelmCharts/portfolio/templates/sealed-secret.yaml
+```
+
+### 6. Commit + push
+
+Flux reconciles → controller decrypts → `Secret/portfolio-smtp` appears in the
+`portfolio` namespace:
+
+```bash
+kubectl -n portfolio get secret portfolio-smtp
+```
+
+### Rotation (SMS-03)
+
+To rotate the Gmail app password:
+
+1. Revoke the old app password in the Google UI.
+2. Generate a new one (step 1 above).
+3. Repeat steps 2–6. The controller re-decrypts on reconcile. In Phase 3 the backend
+   Deployment will pick up the new env values on its next rollout (roll pods manually
+   with `kubectl -n portfolio rollout restart deploy/portfolio-api` if needed).
+
+### Controller sealing-key rotation
+
+The sealed-secrets controller rotates its sealing key every 30 days by default. Old
+SealedSecrets remain decryptable for the retention window, but **new** SealedSecrets
+should be sealed against the current public cert: re-run steps 2 and 4 whenever you
+create a new SealedSecret or rotate credentials.
+
+See [`platform-tools/sealed-secrets/README.md`](../../platform-tools/sealed-secrets/README.md)
+for controller-level details.
+

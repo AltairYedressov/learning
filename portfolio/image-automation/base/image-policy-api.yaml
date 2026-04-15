@@ -1,0 +1,13 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: portfolio-api
+  namespace: flux-system
+spec:
+  imageRepositoryRef:
+    name: portfolio-api
+  filterTags:
+    pattern: '^[0-9a-f]{40}$'
+  policy:
+    alphabetical:
+      order: asc

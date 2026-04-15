@@ -1,66 +1,91 @@
-# ── Frontend Deployment ──────────────────────────────────────────────────────
+# ── Frontend (portfolio-web) Deployment ─────────────────────────────────────
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: portfolio-frontend
+  name: portfolio-web
   namespace: {{ .Values.namespace.name }}
   labels:
-    app: portfolio-frontend
+    app: portfolio-web
     tier: frontend
 spec:
-  replicas: {{ .Values.replicas.frontend }}
+  replicas: {{ .Values.replicas.web }}
   selector:
     matchLabels:
-      app: portfolio-frontend
+      app: portfolio-web
   template:
     metadata:
       labels:
-        app: portfolio-frontend
+        app: portfolio-web
         tier: frontend
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.web | default "portfolio-web" }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
       containers:
-        - name: frontend
-          image: {{ .Values.images.frontend }}
+        - name: web
+          image: {{ .Values.images.web }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           ports:
-            - containerPort: {{ .Values.ports.frontend }}
+            - containerPort: {{ .Values.ports.web }}
           env:
-            - name: API_URL
-              value: {{ .Values.api.url }}
             - name: PORT
-              value: {{ .Values.ports.frontend | quote }}
+              value: {{ .Values.ports.web | quote }}
+            - name: API_URL
+              value: {{ .Values.api.url | quote }}
+            - name: BACKEND_URL
+              value: {{ .Values.api.url | quote }}
+            - name: NODE_ENV
+              value: "production"
           resources:
             requests:
-              cpu: {{ .Values.resources.frontend.requests.cpu }}
-              memory: {{ .Values.resources.frontend.requests.memory }}
+              cpu: {{ .Values.resources.web.requests.cpu }}
+              memory: {{ .Values.resources.web.requests.memory }}
             limits:
-              cpu: {{ .Values.resources.frontend.limits.cpu }}
-              memory: {{ .Values.resources.frontend.limits.memory }}
+              cpu: {{ .Values.resources.web.limits.cpu }}
+              memory: {{ .Values.resources.web.limits.memory }}
           livenessProbe:
             httpGet:
               path: /health
-              port: {{ .Values.ports.frontend }}
+              port: {{ .Values.ports.web }}
             initialDelaySeconds: 10
             periodSeconds: 15
           readinessProbe:
             httpGet:
               path: /health
-              port: {{ .Values.ports.frontend }}
+              port: {{ .Values.ports.web }}
             initialDelaySeconds: 5
             periodSeconds: 10
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 100Mi
 ---
-# ── Frontend Service (ClusterIP — Istio handles ingress) ─────────────────────
+# ── Frontend (portfolio-web) Service — ClusterIP, Istio handles ingress ─────
 apiVersion: v1
 kind: Service
 metadata:
-  name: portfolio-frontend
+  name: portfolio-web
   namespace: {{ .Values.namespace.name }}
   labels:
-    app: portfolio-frontend
+    app: portfolio-web
 spec:
   type: ClusterIP
   selector:
-    app: portfolio-frontend
+    app: portfolio-web
   ports:
-    - port: {{ .Values.ports.frontend }}
-      targetPort: {{ .Values.ports.frontend }}
+    - port: {{ .Values.ports.web }}
+      targetPort: {{ .Values.ports.web }}
       protocol: TCP

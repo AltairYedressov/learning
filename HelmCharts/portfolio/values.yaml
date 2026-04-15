@@ -1,0 +1,51 @@
+# Default values for the portfolio chart.
+# The HelmRelease in portfolio/base/helmrelease.yaml overrides these;
+# these defaults exist so `helm lint` and `helm template` succeed
+# and so the chart is usable standalone.
+namespace:
+  name: portfolio
+
+replicas:
+  api: 2
+  web: 2
+
+images:
+  # Flux image-automation rewrites the tag after these lines (D-02, Phase 2 D-04).
+  web: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-web:PLACEHOLDER # {"$imagepolicy": "flux-system:portfolio-web"}
+  api: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-api:PLACEHOLDER # {"$imagepolicy": "flux-system:portfolio-api"}
+
+ports:
+  api: 5000
+  web: 3000
+
+api:
+  # In-cluster URL used by the frontend container (D-04).
+  url: "http://portfolio-api.portfolio.svc.cluster.local:5000"
+
+# Non-secret backend config (D-04, D-05). SMTP_* + RECIPIENT_EMAIL come from the portfolio-smtp Secret via envFrom.
+config:
+  allowedOrigins: "https://yedressov.com,http://localhost:3000"
+  rateLimit: "5"
+  rateWindowMinutes: "15"
+  maxBodyBytes: "16384"
+
+resources:
+  api:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+  web:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+serviceAccount:
+  # D-10 — dedicated SAs so the AuthorizationPolicy in Plan 03-03 can key on mTLS principals.
+  api: portfolio-api
+  web: portfolio-web

@@ -1,0 +1,119 @@
+# Default-deny all ingress/egress to portfolio-api,
+# then allow only what it strictly needs.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: portfolio-api
+  namespace: portfolio
+spec:
+  podSelector:
+    matchLabels:
+      app: portfolio-api
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow web pods to reach backend API
+    - from:
+        - podSelector:
+            matchLabels:
+              app: portfolio-web
+      ports:
+        - protocol: TCP
+          port: 5000
+    # Allow Istio ingress gateway (for /api routes via VirtualService)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-ingress
+      ports:
+        - protocol: TCP
+          port: 5000
+    # Allow Prometheus metrics scraping via Istio sidecar
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 15090
+  egress:
+    # DNS resolution
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # kube-apiserver (for service account token validation)
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443
+    # istiod xDS configuration
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15012
+    # SMTP egress to Gmail (contact form)
+    - ports:
+        - protocol: TCP
+          port: 587
+---
+# Default-deny all ingress/egress to portfolio-web,
+# then allow only what it strictly needs.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: portfolio-web
+  namespace: portfolio
+spec:
+  podSelector:
+    matchLabels:
+      app: portfolio-web
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow Istio ingress gateway (for / routes via VirtualService)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-ingress
+      ports:
+        - protocol: TCP
+          port: 3000
+    # Allow Prometheus metrics scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 15090
+  egress:
+    # DNS resolution
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Backend API (web only talks to api)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: portfolio-api
+      ports:
+        - protocol: TCP
+          port: 5000
+    # istiod xDS configuration
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+      ports:
+        - protocol: TCP
+          port: 15012

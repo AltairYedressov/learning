@@ -19,3 +19,9 @@ variable "scan_on_push" {
   type        = bool
   default     = true
 }
+
+variable "immutable_repos" {
+  description = "Subset of ecr_names that should be IMMUTABLE regardless of image_tag_mutability default."
+  type        = list(string)
+  default     = []
+}

@@ -1,0 +1,33 @@
+# ServiceAccount definitions for Flux image-automation controllers.
+#
+# The gotk-components.yaml file references these ServiceAccounts from its RBAC,
+# but the bootstrap of this cluster did not include the SA resources themselves
+# (controllers were likely added post-bootstrap or their Deployments/SAs live in
+# a separate manifest we do not regenerate here). We define them explicitly so
+# the IRSA annotation for ECR access can be attached.
+#
+# The annotation eks.amazonaws.com/role-arn binds the image-reflector-controller
+# pod to arn:aws:iam::372517046622:role/image-reflector-role-dev (scoped ECR read
+# on portfolio-web/portfolio-api only — see terraform-infra/root/dev/iam-roles).
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: image-reflector-controller
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/component: image-reflector-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::372517046622:role/image-reflector-role-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: image-automation-controller
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/component: image-automation-controller
+    app.kubernetes.io/instance: flux-system
+    app.kubernetes.io/part-of: flux

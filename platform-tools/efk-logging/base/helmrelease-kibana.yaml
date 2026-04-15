@@ -53,13 +53,25 @@ spec:
 
     podSecurityContext:
       runAsUser: 1000
+      runAsNonRoot: true
       fsGroup: 1000
 
     securityContext:
       allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
       capabilities:
         drop:
           - ALL
+
+    extraVolumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 100Mi
+
+    extraVolumeMounts:
+      - name: tmp
+        mountPath: /tmp
 
     service:
       type: ClusterIP
