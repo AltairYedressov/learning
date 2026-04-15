@@ -22,15 +22,15 @@ spec:
       frontend: 2
 
     images:
-      api: 372517046622.dkr.ecr.us-east-1.amazonaws.com/images/portfolio-backend:5e83c60
-      frontend: 372517046622.dkr.ecr.us-east-1.amazonaws.com/images/portfolio-frontend:5e83c60
+      api: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-api:1325274
+      frontend: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-web:1325274-fix2
 
     ports:
-      api: 8000
+      api: 5000
       frontend: 3000
 
     api:
-      url: "http://portfolio-api.portfolio.svc.cluster.local:8000"
+      url: "http://portfolio-api.portfolio.svc.cluster.local:5000"
 
     resources:
       api:
