@@ -283,7 +283,6 @@ body::before {
 .nav__sound:hover .nav__sound-eq-bar { background: var(--accent); }
 
 .nav__sound-eq {
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -294,32 +293,31 @@ body::before {
 .nav__sound-eq-bar {
   display: block;
   width: 2px;
+  height: 30%;
   background: currentColor;
   border-radius: 1px;
-  transition: background var(--transition);
+  transform-origin: center;
+  transition: background var(--transition), height var(--transition);
 }
 .nav__sound-eq-bar:nth-child(1) { height: 40%; }
-.nav__sound-eq-bar:nth-child(2) { height: 80%; }
-.nav__sound-eq-bar:nth-child(3) { height: 60%; }
+.nav__sound-eq-bar:nth-child(2) { height: 70%; }
+.nav__sound-eq-bar:nth-child(3) { height: 55%; }
 .nav__sound-eq-bar:nth-child(4) { height: 30%; }
 
-.nav__sound-eq-slash {
-  position: absolute;
-  left: -3px;
-  right: -3px;
-  top: 50%;
-  height: 2px;
-  background: currentColor;
-  border-radius: 1px;
-  transform: rotate(-35deg);
-  transform-origin: center;
-  transition: opacity var(--transition), background var(--transition);
-  pointer-events: none;
-}
-
 [data-sound="on"] .nav__sound { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
-[data-sound="on"] .nav__sound-eq-bar { background: var(--accent); }
-[data-sound="on"] .nav__sound-eq-slash { opacity: 0; }
+[data-sound="on"] .nav__sound-eq-bar { background: var(--accent); animation: nav-sound-eq 0.9s ease-in-out infinite; }
+[data-sound="on"] .nav__sound-eq-bar:nth-child(1) { animation-delay: 0s; }
+[data-sound="on"] .nav__sound-eq-bar:nth-child(2) { animation-delay: 0.15s; }
+[data-sound="on"] .nav__sound-eq-bar:nth-child(3) { animation-delay: 0.3s; }
+[data-sound="on"] .nav__sound-eq-bar:nth-child(4) { animation-delay: 0.45s; }
+
+@keyframes nav-sound-eq {
+  0%, 100% { transform: scaleY(0.4); }
+  50%      { transform: scaleY(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-sound="on"] .nav__sound-eq-bar { animation: none; }
+}
 
 /* ── Mobile Menu ─────────────────────────────────────────────── */
 .mobile-menu {
