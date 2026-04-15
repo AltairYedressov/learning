@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1.7
+# retrigger: BACKEND_PORT=8000 build
 
 # ── Builder stage: install deps into a venv ────────────────────────────────
 FROM python:3.12-slim-bookworm AS builder
