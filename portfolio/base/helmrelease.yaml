@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: portfolio
-      version: "0.1.0"
+      version: "0.2.0"
       sourceRef:
         kind: HelmRepository
         name: ecr-charts
@@ -22,8 +22,8 @@ spec:
       frontend: 2
 
     images:
-      api: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-api:a01871f892d9d11939adcec49bb7a872543a03a8
-      frontend: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-web:a01871f892d9d11939adcec49bb7a872543a03a8
+      api: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-api:42476509714ae08c779e1d7190d8842e0dfba1c5
+      frontend: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-web:42476509714ae08c779e1d7190d8842e0dfba1c5
 
     ports:
       api: 8000
