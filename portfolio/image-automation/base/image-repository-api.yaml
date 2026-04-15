@@ -1,0 +1,9 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: portfolio-api
+  namespace: flux-system
+spec:
+  image: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-api
+  interval: 5m
+  provider: aws
