@@ -1,101 +1,169 @@
-# Integrations
+# External Integrations
 
-External systems, APIs, managed services, and inter-service dependencies.
+**Analysis Date:** 2026-04-15
 
-## AWS Managed Services
+## APIs & External Services
 
-Provisioned via Terraform in `terraform-infra/root/dev/`:
+**AWS (sole cloud provider, region `us-east-1`, account `372517046622`):**
+- **EKS** - Managed Kubernetes control plane (`terraform-infra/eks-cluster/eks.tf`)
+  - Public endpoint enabled; nodes in public subnets (per project constraint)
+  - Cluster log types: `api`, `audit`
+- **EC2 / ASG** - Worker node group via launch template (`terraform-infra/eks-cluster/asg.tf`, `launch-tm.tf`)
+- **VPC, IGW, route tables, subnets, security groups** (`terraform-infra/networking/*`)
+- **RDS** - Managed relational DB (`terraform-infra/database/main.tf`)
+  - Master password managed by AWS Secrets Manager (`manage_master_user_password = true`)
+  - Optional cross-region DR replica + automated backup replication
+- **S3** - Terraform state bucket `372517046622-terraform-state-dev` and Thanos object storage (`terraform-infra/s3/s3.tf`)
+- **DynamoDB** - Terraform state lock table `372517046622-terraform-lock-dev`
+- **ECR** - Docker image registry + OCI Helm chart registry (`terraform-infra/ecr/`, `HelmCharts/portfolio` published to `oci://372517046622.dkr.ecr.us-east-1.amazonaws.com/helm-charts`)
+- **IAM + IRSA** - Cluster role, node role, EBS CSI IRSA, platform-tool service account roles (`terraform-infra/iam-role-module/`, `terraform-infra/eks-cluster/oidc-providers.tf`, `access-entries.tf`)
+- **Route53** - DNS for `yedressov.com` (`terraform-infra/dns/route53`)
+- **ACM** - TLS certificates for NLB / Istio ingress (`terraform-infra/dns/acm`)
+- **NLB** - Provisioned by in-cluster AWS Load Balancer Controller for Istio ingress
+- **Secrets Manager** - RDS master credential storage (auto-managed)
+- **STS** - OIDC token exchange for GitHub Actions and IRSA
 
-| Service | Module | Purpose |
-|---------|--------|---------|
-| **VPC / Networking** | `terraform-infra/root/dev/networking/` | VPC, public/private subnets, IGW, route tables, security groups |
-| **EKS** | `terraform-infra/root/dev/eks/` | Managed Kubernetes control plane + managed node group |
-| **IAM** | `terraform-infra/root/dev/iam-roles/` | Service roles, IRSA roles for platform-tools, GitHub OIDC provider |
-| **S3** | `terraform-infra/root/dev/s3/` | Terraform state backend (`${ACCOUNT_ID}-terraform-state-dev`), Thanos long-term metrics, Velero backups |
-| **RDS / Aurora** | `terraform-infra/root/dev/database/` | Postgres-compatible DB (dev) with password in Secrets Manager |
-| **ECR** | `terraform-infra/root/dev/ecr/` | Container registry for frontend + backend images |
-| **Route 53** | `terraform-infra/root/dev/dns/` | DNS for `yedressov.com` → NLB alias |
-| **ACM** | Via DNS stack | TLS certificate for NLB (HTTPS termination at edge) |
-| **AWS Secrets Manager** | Via database stack | RDS password storage |
-| **NLB** | Provisioned by AWS Load Balancer Controller | Ingress traffic → Istio Gateway |
+**SDK / clients used:**
+- AWS provider in Terraform (`hashicorp/aws ~> 6.0`)
+- `aws eks get-token` exec plugin for Kubernetes/Flux providers (`terraform-infra/eks-cluster/flux.tf`)
+- `aws-actions/configure-aws-credentials@v4` and `aws-actions/amazon-ecr-login@v2` in GitHub Actions
 
-## Platform Tools (In-Cluster)
+**GitHub:**
+- **GitHub API** via `integrations/github ~> 6.11` Terraform provider
+  - Manages branch protection on `main` requiring status checks `publish-images` and `terraform (iam-roles)` (`terraform-infra/root/dev/eks/main.tf`)
+- **GitHub Actions** - CI/CD platform (`.github/workflows/`)
+- **GitHub OIDC** - Federated identity to AWS IAM role (`vars.IAM_ROLE`); no static AWS keys stored
 
-Deployed as HelmReleases under `platform-tools/`, reconciled by Flux:
+**FluxCD <-> GitHub:**
+- Flux bootstrapped from Terraform (`flux_bootstrap_git`) writing to `clusters/dev-projectx/`
+- Authenticates to repo via PAT (`var.github_token` / `secrets.FLUX_GITHUB_PAT`) using basic auth (`username = "git"`)
+- Pulls Helm charts from ECR OCI registry via `HelmRepository` with `provider: aws` (`portfolio/base/helmrepository.yaml`)
+- Image automation polls ECR for new tags (`portfolio/image-automation/base/`)
 
-| Tool | Path | Role |
-|------|------|------|
-| **Istio** | `platform-tools/istio/` | Service mesh — Gateway (Envoy ingress), VirtualServices, automatic mTLS |
-| **AWS Load Balancer Controller** | `platform-tools/aws-lb-controller/` | Provisions AWS NLB for Istio ingress Service |
-| **Karpenter** | `platform-tools/karpenter/` | Node autoscaling based on pending pods |
-| **Sealed Secrets** | `platform-tools/sealed-secrets/` | Encrypt secrets for safe Git commit |
-| **Velero** | `platform-tools/velero/` | Cluster backup/restore, S3 backend |
-| **EFK Logging** | `platform-tools/efk-logging/` | Elasticsearch, Fluentd, Kibana — centralized logs |
-| **EKS Monitoring** | `platform-tools/eks-monitoring/` | Prometheus + Grafana |
-| **Thanos** | `platform-tools/thanos/` | Long-term metrics storage on S3 |
-| **Kyverno** | `platform-tools/kyverno/` | Policy engine (admission control) |
-| **kube-system** | `platform-tools/kube-system/` | Core-dns and kube-system customizations |
+**SMTP (Email Delivery):**
+- Backend `/api/contact` sends mail via SMTP STARTTLS (`app/portfolio/api/app.py`)
+- Default host `smtp.gmail.com:587`; recipient default `contact@yedressov.com`
+- Credentials supplied through Sealed Secret synced into the `portfolio` namespace (see commit `cbf24b9`: "wire SealedSecret SMTP creds into backend")
 
-## GitOps Source-of-Truth
+## Data Storage
 
-- **FluxCD** (`clusters/dev-projectx/`) reconciles Git → cluster every 10m
-- **GitHub repo** — source of manifests; requires a GitHub PAT passed as Terraform variable to bootstrap Flux
-- **Kustomization / HelmRelease CRDs** — declarative deployment definitions
+**Databases:**
+- AWS RDS instance provisioned by `terraform-infra/database/main.tf`
+  - Engine/version configurable via TF vars; storage encrypted with KMS key
+  - Subnet group built from private subnets; SG sourced via `data.aws_security_group.database_sg`
+  - IAM database authentication available (`iam_database_authentication_enabled`)
+  - Note: Not currently consumed by the deployed portfolio app (frontend + Flask contact API are stateless)
 
-## CI/CD
+**File / Object Storage:**
+- AWS S3 buckets:
+  - `372517046622-terraform-state-dev` - Terraform remote state (encrypted)
+  - Thanos long-term metric blocks bucket (`platform-tools/thanos/`)
+  - Velero backup bucket (`platform-tools/velero/`)
 
-- **GitHub Actions** (`.github/workflows/deploy-workflow.yaml`) — pipeline for Terraform plan/apply + Docker build/push to ECR
-- **OIDC federation** — GitHub Actions authenticates to AWS via OIDC provider (no long-lived AWS keys)
+**Caching:**
+- None (in-process rate-limiter dict only, `app/portfolio/api/app.py:_rate_store`)
 
-## Inter-Service Communication
+## Authentication & Identity
 
-| From | To | Protocol | Notes |
-|------|-----|----------|-------|
-| Browser | NLB (`yedressov.com`) | HTTPS (TLS 1.2+, ACM cert) | Public entry |
-| NLB | Istio Gateway (Envoy) | HTTP (cluster-internal) | 8080 HTTP→HTTPS redirect, 8443 passthrough |
-| Istio Gateway | Frontend Service | HTTP (mTLS via Istio sidecars) | Path-based routing; default route |
-| Istio Gateway | Backend Service | HTTP (mTLS) | `/api` prefix → `portfolio-api:8000` |
-| Frontend pod | Backend pod | HTTP (mTLS) | `API_URL` env → `http://portfolio-api:8000` |
-| Backend pod | (none — stateless) | — | Resume data hardcoded; no DB reads in current code |
+**End-user auth:**
+- None - public marketing/portfolio site, no login
 
-## Data Stores
+**Service-to-service auth:**
+- Istio mTLS between pods (PeerAuthentication / automatic mTLS in mesh)
+- Kubernetes ServiceAccounts for platform tools
 
-- **Application data**: hardcoded in `app/backend/main.py` (PROFILE, SKILLS, EXPERIENCE, CERTIFICATIONS, PROJECTS). No runtime DB access.
-- **RDS**: provisioned but not yet consumed by the backend (future use).
-- **S3 buckets**: infra state, Thanos metrics, Velero backups — not accessed by application code.
+**Cloud auth:**
+- IRSA (IAM Roles for Service Accounts) for in-cluster controllers (EBS CSI, AWS LB Controller, Karpenter, Velero, External DNS, Thanos)
+- GitHub Actions assumes AWS role via OIDC (`id-token: write`)
+- Terraform CLI inherits caller IAM identity via OIDC during CI
 
-## Authentication & Authorization
+**Repo auth:**
+- Flux uses GitHub PAT (`FLUX_GITHUB_PAT`) for repo read/write
+- TF GitHub provider uses same PAT for branch-protection management
 
-| Surface | Mechanism |
-|---------|-----------|
-| GitHub Actions → AWS | OIDC (no static creds) |
-| Platform-tools pods → AWS APIs | IRSA (IAM Roles for Service Accounts) |
-| Flux → GitHub | GitHub PAT (Terraform variable) |
-| Pod ↔ Pod | Istio automatic mTLS (`enableAutoMtls: true`) |
-| User → Site | None (public portfolio — no auth layer) |
-| Backend `/api/*` | None (public read-only endpoints) |
+## Monitoring & Observability
 
-## Observability Endpoints
+**Metrics:**
+- kube-prometheus-stack (`platform-tools/eks-monitoring/`)
+- Thanos sidecar + store/query with S3 backend (`platform-tools/thanos/`)
 
-- `GET /health` (backend) — Kubernetes readiness/liveness probe
-- `GET /health` (frontend Express) — K8s probe
-- Prometheus scrapes Envoy sidecars, kubelet, node_exporter
-- Fluentd tails pod stdout → Elasticsearch
-- Grafana dashboards consume Prometheus + Thanos
+**Logging:**
+- EFK stack (Elasticsearch + Fluentd + Kibana) (`platform-tools/efk-logging/`)
+- Application logs via stdout (`console.log`/`console.error` in Node, `logging` module in Python)
+- EKS control-plane logs: `api`, `audit` shipped to CloudWatch (`terraform-infra/eks-cluster/eks.tf`)
 
-## No External SaaS APIs
+**Error Tracking:**
+- None integrated (no Sentry/Datadog/Rollbar SDKs detected)
 
-The application does **not** call third-party APIs at runtime (no Stripe, Auth0, Sentry, analytics, email providers, etc.). All integrations are AWS-internal or in-cluster.
+## CI/CD & Deployment
 
-## Secrets Flow
+**Hosting / runtime:**
+- Application: AWS EKS in `us-east-1`
+- Edge: AWS NLB -> Istio ingress gateway -> VirtualService -> portfolio Services
+- DNS: Route53 `yedressov.com`; TLS via ACM on NLB
 
-1. RDS password generated by Terraform → written to AWS Secrets Manager
-2. Flux-managed Sealed Secrets encrypt per-cluster secrets (GitHub PAT, chart values) for safe commit
-3. IRSA tokens rotated automatically by EKS (no stored creds in pods)
+**CI Pipelines (`.github/workflows/`):**
+- `deploy-workflow.yaml` - Terraform multi-stack deploy
+  - Triggers: `push` to `feature/**` or `main`, `pull_request` to `main` (paths: `terraform-infra/**`)
+  - Steps: setup-terraform 1.6.6 -> Checkov scan -> fmt -> validate -> plan -> apply (main only)
+  - AWS auth via OIDC (`vars.IAM_ROLE`); state in S3 with DynamoDB lock
+- `portfolio-images.yaml` - Build/push portfolio API + frontend Docker images
+  - Triggers: changes under `app/portfolio/**`
+  - Matrix builds `portfolio-api` and `portfolio-web` -> push to ECR tagged with `${{ github.sha }}`
+  - Uses Buildx with GHA cache (`type=gha`)
+- `helmchart.yaml` - Lint + publish portfolio Helm chart
+  - Triggers: changes under `HelmCharts/portfolio/**`
+  - `helm lint` + `helm template` smoke render -> `helm package` -> `helm push` to ECR OCI registry
+- `validation-PT.yaml` - Ephemeral test cluster on `feature/PT**` branches
+  - Creates throwaway EKS via `scripts/cluster-creation.sh`, bootstraps Flux, runs validation, then destroys
 
-## Known Integration Risks
+**GitOps (FluxCD reconcile loop, 10m interval):**
+- Flux source of truth: `clusters/dev-projectx/` Kustomizations
+- Manages: portfolio app, Istio, AWS LB Controller, Karpenter, EFK, monitoring, Thanos, Sealed Secrets, Kyverno, Velero, kube-system tweaks
+- Image automation in `portfolio/image-automation/base/` updates HelmRelease image tags from ECR
 
-- **Flux → GitHub PAT** is long-lived and passed as TF variable (rotation burden)
-- **Backend → RDS** wiring not yet present in code; schema, migrations, and connection pooling TBD
-- **No circuit breakers** between frontend and backend — upstream failure returns 503 via `error.ejs`
-- **No cross-region or multi-AZ** concerns documented (dev is single-region)
+**Branch protection (enforced via Terraform):**
+- `main` requires checks: `publish-images`, `terraform (iam-roles)` (`terraform-infra/root/dev/eks/main.tf`)
+
+## Environment Configuration
+
+**Required GitHub Actions secrets / vars:**
+- `secrets.FLUX_GITHUB_PAT` - GitHub PAT used by Flux + TF GitHub provider
+- `vars.IAM_ROLE` - AWS IAM role ARN trusted by GitHub OIDC
+
+**Terraform input variables (passed via `TF_VAR_*` in `deploy-workflow.yaml`):**
+- `TF_VAR_github_token`, `TF_VAR_github_org`, `TF_VAR_github_repo`
+
+**Application runtime env (set via Helm values / Sealed Secret):**
+- Frontend: `BACKEND_URL`, `PORT`, `NODE_ENV`
+- Backend: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `RECIPIENT_EMAIL`, `ALLOWED_ORIGINS`, `RATE_LIMIT`, `RATE_WINDOW_MINUTES`, `MAX_BODY_BYTES`, `BACKEND_PORT`, `FLASK_DEBUG`
+
+**Secret storage:**
+- AWS Secrets Manager - RDS master password (auto-managed)
+- Sealed Secrets controller in cluster - SMTP credentials and other workload secrets, encrypted in Git
+- GitHub repo secrets - CI tokens (PAT only; no AWS static keys)
+- `.env` files - local development only, not committed (not read by this analysis)
+
+## Webhooks & Callbacks
+
+**Incoming HTTP endpoints (exposed publicly via Istio ingress):**
+- Frontend (`app/portfolio/frontend/server.js`):
+  - `GET /health` - liveness probe (does NOT proxy to backend)
+  - `GET /api/*` and `POST /api/*` - reverse-proxied to `BACKEND_URL` preserving `/api` prefix
+  - `GET *` - SPA fallback to `public/index.html`
+- Backend (`app/portfolio/api/app.py`):
+  - `GET /health` and `GET /api/health` - liveness/readiness
+  - `POST /api/contact` - validated contact form submission, rate-limited per `X-Forwarded-For`/`remote_addr`
+
+**Outgoing calls:**
+- Backend -> SMTP server (`SMTP_HOST:SMTP_PORT`, STARTTLS) for contact-form mail delivery
+- Frontend -> Backend over in-cluster service DNS (`http://portfolio-api.portfolio.svc.cluster.local:8000`)
+- Flux controllers -> GitHub HTTPS (repo polling) and ECR OCI (chart pulls)
+- Image automation -> ECR (image tag listing)
+
+**Webhooks:**
+- None configured (Flux operates on poll interval rather than webhooks)
+
+---
+
+*Integration audit: 2026-04-15*

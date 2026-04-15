@@ -4,223 +4,200 @@
 
 ## Pattern Overview
 
-**Overall:** Two-tier cloud-native portfolio application deployed on AWS EKS with Istio service mesh and GitOps reconciliation.
+**Overall:** Cloud-native two-tier portfolio application running on AWS EKS, provisioned by Terraform and continuously reconciled by FluxCD (GitOps). Istio service mesh provides ingress and east-west traffic; platform tooling is layered via Kustomize bases/overlays.
 
 **Key Characteristics:**
-- Stateless frontend and backend microservices running in Kubernetes
-- Infrastructure as Code (Terraform) with modular workspace separation (dev/prod)
-- Git-driven cluster state via FluxCD (10-minute reconciliation interval)
-- Service mesh traffic management with automatic mTLS between pods
-- Automated CI/CD via GitHub Actions with OIDC-based AWS authentication
-- Complete observability stack: EFK logging, Prometheus/Grafana metrics, Thanos long-term storage, Velero backup
+- Strict separation between **infrastructure** (Terraform), **platform** (Flux-managed Kustomize/Helm), and **application** (Helm chart consumed via OCI HelmRelease).
+- **GitOps-first**: nothing is deployed by hand to the cluster; the only path to prod is `git push` → Flux reconciliation (10m interval).
+- **OIDC everywhere**: GitHub Actions → AWS via OIDC role; pods → AWS via IRSA; no long-lived AWS keys in CI or cluster.
+- **Frontend-as-proxy**: Express frontend serves static SPA assets and proxies `/api/*` to a Flask backend over a ClusterIP service (no direct external exposure of API).
+- **Image tag automation**: CI publishes images tagged with the commit SHA; HelmRelease values reference the SHA tag (Flux image-automation scaffolding exists under `portfolio/image-automation/base/`).
 
 ## Layers
 
-**Application Layer:**
-- Purpose: Serve portfolio pages and resume data to end users
-- Location: `app/frontend/` (Node.js/Express), `app/backend/` (Python/FastAPI)
-- Contains: Express web server, EJS templates, FastAPI REST endpoints, Pydantic data models
-- Depends on: Docker containers, Kubernetes pod infrastructure, Istio traffic routing
-- Used by: End users via browser, frontend service calls backend API internally
+**Layer 1 — Application code (`app/portfolio/`):**
+- Purpose: Portfolio website (static SPA + contact-form email API).
+- Location: `app/portfolio/frontend/` (Node 20 / Express), `app/portfolio/api/` (Python 3.12 / Flask).
+- Contains: `server.js`, `app.py`, Dockerfiles, `public/` static assets, `requirements.txt`, `package.json`.
+- Depends on: SMTP relay (Gmail by default) for outbound contact emails.
+- Used by: Container builds in `.github/workflows/portfolio-images.yaml`.
 
-**Kubernetes/Container Layer:**
-- Purpose: Orchestrate containerized services with health checks, networking, resource management, and auto-scaling
-- Location: `HelmCharts/portfolio/templates/`, `portfolio/base/` (base manifests), `portfolio/overlays/dev/` (environment-specific patches)
-- Contains: Helm chart templates for backend/frontend Deployments, ClusterIP Services, Istio VirtualService, NetworkPolicy, namespace isolation
-- Depends on: EKS cluster, Docker images from ECR, Flux reconciliation, Istio control plane
-- Used by: EKS cluster for pod scheduling, Flux for GitOps reconciliation
+**Layer 2 — Application packaging (`HelmCharts/portfolio/`):**
+- Purpose: Helm chart that renders Deployments, Services, and SealedSecret for the portfolio app.
+- Location: `HelmCharts/portfolio/Chart.yaml`, `HelmCharts/portfolio/templates/`, `HelmCharts/portfolio/values.yaml`.
+- Contains: `01-backend.yaml` (api Deployment + ClusterIP), `02-frontend.yaml` (frontend Deployment + ClusterIP), `sealed-secret.yaml` (SMTP creds).
+- Depends on: ECR-hosted images, sealed-secrets controller in cluster.
+- Used by: `portfolio/base/helmrelease.yaml` HelmRelease (chart pulled from OCI registry).
 
-**Service Mesh & Ingress Layer:**
-- Purpose: Route external traffic to applications, enforce mTLS between pods, handle TLS termination
-- Location: `platform-tools/istio/` (Istio Gateway/VirtualService templates), `platform-tools/aws-lb-controller/` (NLB integration)
-- Contains: Istio Gateway (Envoy proxy on public IPs), VirtualService routing rules (hostname/path-based), AWS Load Balancer Controller for NLB provisioning
-- Depends on: EKS cluster, AWS NLB, Route53 DNS, Envoy sidecar proxies
-- Used by: End users making HTTP/HTTPS requests, inter-pod service-to-service communication
+**Layer 3 — Application GitOps (`portfolio/`):**
+- Purpose: Bind the Helm chart to the cluster with environment overlays and ingress routing.
+- Location: `portfolio/base/` (HelmRepository, HelmRelease, VirtualService, Namespace), `portfolio/overlays/{dev,prod}/`, `portfolio/image-automation/base/`.
+- Contains: `helmrepository.yaml` (OCI ECR), `helmrelease.yaml` (chart version 0.3.0 + values overrides), `virtualservice.yaml` (Istio routing — `/api` → backend, else frontend), `kustomization.yaml`.
+- Depends on: ECR HelmRepository, sealed-secrets, Istio Gateway (`istio-ingress/main-gateway`).
+- Used by: `clusters/dev-projectx/portfolio.yaml` Flux Kustomization.
 
-**Infrastructure & Platform Tools Layer:**
-- Purpose: Provision and manage cloud resources, provide observability and operational tools
-- Location: `terraform-infra/` (AWS resource provisioning), `platform-tools/` (Kubernetes cluster-wide tools)
-- Contains: 
-  - Terraform: VPC/networking, EKS cluster, IAM roles, RDS database, S3 state/backups, ECR registry, Route53/ACM DNS
-  - Platform tools: Karpenter (node autoscaling), Velero (backup), EFK (logging), Prometheus/Grafana/Thanos (metrics), Sealed Secrets (secret encryption), Kyverno (policy enforcement)
-- Depends on: AWS account, GitHub token for Flux CD, IAM permissions
-- Used by: All workloads in cluster, operators for debugging and recovery
+**Layer 4 — Platform tools (`platform-tools/`):**
+- Purpose: Cluster-wide capabilities (ingress, autoscaling, secrets, backup, logging, metrics, policy).
+- Location: `platform-tools/{istio,karpenter,aws-lb-controller,sealed-secrets,velero,efk-logging,thanos,kube-system,kyverno,eks-monitoring}/` each with `base/` + `overlays/{dev,prod}/`.
+- Contains: HelmRelease/HelmRepository/Kustomization manifests per tool; istio split into `istio-system` (control plane) and `istio-ingress` (data plane Gateway).
+- Depends on: EKS cluster, IAM roles via IRSA, AWS resources (NLB, S3, Route53).
+- Used by: All workloads; bound to the cluster by Flux Kustomizations in `clusters/dev-projectx/`.
 
-**GitOps Orchestration Layer:**
-- Purpose: Provide Git as single source of truth for cluster and application state
-- Location: `clusters/dev-projectx/` (Flux Kustomization manifests), `portfolio/base/helmrelease.yaml` (HelmRelease CRD)
-- Contains: Flux CD Kustomization resources pointing to Git paths, HelmRelease manifests for all deployments (apps + platform tools), sealed secrets for sensitive config
-- Depends on: GitHub repository, FluxCD Operator (installed in cluster), Helm repositories
-- Used by: Flux reconciliation loop (every 10m) to pull Git state and apply to cluster
+**Layer 5 — Cluster bindings (`clusters/`):**
+- Purpose: Per-cluster Flux Kustomizations declaring which platform tools and apps to install, with explicit `dependsOn` ordering.
+- Location: `clusters/dev-projectx/` (live), `clusters/test/` (scaffold), `clusters/dev-projectx/flux-system/` (Flux components + GitRepository).
+- Contains: `portfolio.yaml`, `istio.yaml`, `karpenter.yaml`, `aws-lb-controller.yaml`, `sealed-secrets.yaml`, `velero.yaml`, `efk-logging.yaml`, `thanos.yaml`, `kyverno.yaml`, `monitoring.yaml`, `kube-system.yaml`, `flux-system/{gotk-components,gotk-sync,kustomization,networkpolicy,image-automation-sa}.yaml`.
+- Depends on: GitRepository `flux-system` pointing at `https://github.com/AltairYedressov/learning` branch `main`.
+- Used by: Flux controllers in-cluster.
+
+**Layer 6 — Infrastructure (`terraform-infra/`):**
+- Purpose: Provision AWS primitives (VPC, subnets, IGW, SGs, EKS, IAM roles + IRSA, ECR, RDS, S3, Route53, ACM, Flux bootstrap).
+- Location: Reusable modules at top level (`networking/`, `eks-cluster/`, `iam-role-module/`, `database/`, `s3/`, `ecr/`, `dns/`, `bootstrap/`); per-environment root workspaces under `terraform-infra/root/{dev,prod}/{networking,iam-roles,s3,ecr,eks,database,dns}/`.
+- Contains: `*.tf` per workspace with `main.tf`, `variables.tf`, `providers.tf`, `backend.tf` (S3 remote state); IAM policy JSON in `iam-role-module/Policies/`; Flux GitHub bootstrap in `eks-cluster/flux.tf`.
+- Depends on: AWS account (372517046622), GitHub PAT (for Flux bootstrap & branch protection).
+- Used by: GitHub Actions Terraform jobs (plan on PR, apply on main).
+
+**Layer 7 — CI/CD (`.github/workflows/`):**
+- Purpose: Build/push images, lint+publish Helm chart, plan/apply Terraform.
+- Location: `.github/workflows/portfolio-images.yaml`, `helmchart.yaml`, `deploy-workflow.yaml`, `validation-PT.yaml`.
+- Contains: Path-filtered triggers, matrix Docker builds, OIDC AWS auth, ECR push, Helm OCI publish.
+- Used by: Branch protection (`main`) requires `publish-images` and `terraform (iam-roles)` status checks.
 
 ## Data Flow
 
-**User Request → Application:**
+**Inbound user request (`yedressov.com`):**
+1. DNS resolution via Route53 (`terraform-infra/dns/route53/`).
+2. AWS NLB (provisioned by AWS Load Balancer Controller from `platform-tools/aws-lb-controller/`).
+3. Istio Ingress Gateway (Envoy in `istio-ingress` namespace) terminates TLS using ACM cert.
+4. Istio `VirtualService` (`portfolio/base/virtualservice.yaml`) matches host `yedressov.com`:
+   - URI prefix `/api` → ClusterIP service `portfolio-api:8000` (Flask).
+   - Otherwise → ClusterIP service `portfolio-frontend:3000` (Express, serves SPA + proxies `/api/*` itself if hit directly).
+5. Pod-to-pod traffic is auto-mTLS via Istio sidecars.
 
-1. User types `yedressov.com` → Route53 resolves to AWS NLB public IP
-2. NLB terminates TLS 1.2+ via ACM certificate → forwards to Istio Gateway (Envoy proxy)
-3. Istio Gateway matches hostname `yedressov.com` against VirtualService rules (from `portfolio/base/virtualservice.yaml`)
-4. Request path-based routing: `/api/*` → portfolio-api (backend), else → portfolio-frontend (frontend)
-5. Envoy routes to Kubernetes Service (ClusterIP) → Pod with matching labels
-6. Pod health checks verify readiness before receiving traffic (HTTP GET `/health` endpoint)
+**Contact form submission:**
+1. Browser POSTs to `/api/contact` → frontend (Express) → `http-proxy-middleware` forwards to `BACKEND_URL` (or Istio routes directly via VirtualService).
+2. Flask handler in `app/portfolio/api/app.py` validates payload, applies in-memory rate limit (5/15min per IP), sends via SMTP (`smtplib.SMTP`, STARTTLS) using creds from `portfolio-smtp` SealedSecret (`HelmCharts/portfolio/templates/sealed-secret.yaml`).
 
-**Frontend → Backend Communication:**
+**GitOps reconciliation:**
+1. Developer pushes to `main`.
+2. GitHub Actions (`portfolio-images.yaml`) builds + pushes images tagged `${{ github.sha }}` to ECR.
+3. `helmchart.yaml` lints and publishes new chart version to `oci://372517046622.dkr.ecr.us-east-1.amazonaws.com/helm-charts/`.
+4. Flux GitRepository polls every 1m; root Kustomization (`./clusters/dev-projectx`) reconciles every 10m.
+5. Each child Kustomization (`portfolio.yaml`, `istio.yaml`, etc.) reconciles its target path.
+6. HelmRelease pulls chart from OCI HelmRepository and runs `helm upgrade --install`.
 
-1. Browser loads frontend pod (Express server on port 3000)
-2. Frontend async handler (from `app/frontend/src/server.js` line 19-29) calls `axios.get('http://portfolio-api.portfolio.svc.cluster.local:8000/api/all')`
-3. Service mesh intercepts: Envoy sidecar on frontend pod intercepts request
-4. Automatic mTLS established between frontend and backend Envoy sidecars
-5. Backend FastAPI handler returns JSON (`/api/all` from `app/backend/main.py` line 213-222)
-6. Frontend renders EJS template with resume data
-
-**Infrastructure State Management:**
-
-1. Developer pushes code to GitHub main branch
-2. GitHub Actions workflow (`.github/workflows/image.yaml`) runs CI/CD:
-   - Docker builds frontend and backend images
-   - Trivy scans for vulnerabilities
-   - Images pushed to ECR with short SHA tag (e.g., `5e83c60`)
-3. Terraform applies infrastructure changes (root workspace orchestrates: networking, EKS, IAM, database, ECR, DNS)
-4. FluxCD reconciliation detects Git changes every 10 minutes
-5. Flux reads HelmRelease CRD (from `portfolio/base/helmrelease.yaml`) → pulls Helm chart from ECR repository
-6. Helm renders chart templates with values → kubectl applies manifests
-7. Karpenter autoscaler provisions/terminates nodes based on pod resource requests
-8. Pods scheduled by Kubelet → readiness probes check health → service receives traffic
-
-**Secrets & Configuration:**
-
-- Environment variables (e.g., `API_URL`) passed to frontend via HelmRelease values (from `portfolio/base/helmrelease.yaml` line 32)
-- Database credentials (RDS password) stored in AWS Secrets Manager (not in Git)
-- Sealed Secrets encrypts sensitive cluster config before Git commit (managed by sealed-secrets platform tool)
+**Infrastructure provisioning:**
+1. Engineer edits `terraform-infra/root/dev/<workspace>/`.
+2. PR triggers `terraform plan`; merge triggers `terraform apply` via OIDC-assumed role.
+3. State persisted in S3 bucket `372517046622-terraform-state-dev` (provisioned by `bootstrap/`).
 
 ## Key Abstractions
 
-**HelmRelease CRD (Flux + Helm Integration):**
-- Purpose: Declarative Helm chart deployment with GitOps reconciliation and auto-rollback
-- Examples: `portfolio/base/helmrelease.yaml`, `platform-tools/eks-monitoring/base/helmrelease.yaml`
-- Pattern: Flux watches HelmRelease resource, periodically runs `helm upgrade --install`, auto-rolls back on failed upgrade, reconciliation interval configurable (10m default)
-- Implementation: Helm chart (`HelmCharts/portfolio/Chart.yaml`) defines templates, HelmRelease specifies which chart version to deploy and custom values
+**Flux `Kustomization` CRD:**
+- Purpose: Bind a path in the repo to the cluster with reconcile interval, prune, and dependency ordering.
+- Examples: `clusters/dev-projectx/portfolio.yaml`, `clusters/dev-projectx/istio.yaml`, `clusters/dev-projectx/karpenter.yaml`.
+- Pattern: `spec.path: ./<dir>`, `prune: true`, `dependsOn: [...]` to enforce ordering (e.g. `istio-ingress` depends on `istio-system` + `aws-lb-controller`).
 
-**Istio VirtualService (Layer 7 Routing):**
-- Purpose: Define application-level routing rules for traffic matching hostname and URI path
-- Examples: `portfolio/base/virtualservice.yaml`
-- Pattern: Matches on `hosts` (DNS) and `http[].match.uri.prefix` (path prefix) → routes to Kubernetes Service names with specific ports
-- Use case: `/api` → `portfolio-api:8000`, else → `portfolio-frontend:3000`
+**Flux `HelmRelease` + `HelmRepository`:**
+- Purpose: Declarative Helm install with values override and auto-rollback.
+- Examples: `portfolio/base/helmrelease.yaml` (app), `platform-tools/*/base/helmrelease.yaml` (each tool).
+- Pattern: HelmRepository points at OCI ECR (`oci://.../helm-charts/`) with `provider: aws` for IRSA-based auth; HelmRelease pins chart version (e.g. `portfolio` `0.3.0`) and supplies `values:` inline.
 
-**Istio Gateway (Layer 4/7 Entry Point):**
-- Purpose: Define which ports/protocols Envoy listens on and which hosts to accept
-- Examples: `platform-tools/istio/istio-ingress/base/gateway.yaml`
-- Pattern: Selector `istio: ingressgateway` binds to Envoy Deployment, dual ports (8080 HTTP redirect, 8443 HTTPS), certificate reference
-- Integration: AWS NLB → Istio Gateway → VirtualService routing
+**Kustomize `base/` + `overlays/{dev,prod}/`:**
+- Purpose: Reusable manifest base with environment-specific patches.
+- Examples: `portfolio/base/` + `portfolio/overlays/dev/patch.yaml`, every `platform-tools/*/`.
+- Pattern: `overlays/<env>/kustomization.yaml` references `../../base` and applies `patches:`.
 
-**Terraform Module Pattern (Reusable Infrastructure):**
-- Purpose: Package infrastructure building blocks (networking, IAM, EKS, databases) for reuse across dev/prod
-- Examples: `terraform-infra/iam-role-module/main.tf`, `terraform-infra/eks-cluster/`, `terraform-infra/networking/vpc-module/`
-- Pattern: Module exposes `variables.tf` for inputs, `main.tf` for resources, `outputs.tf` for return values; root workspace (`terraform-infra/root/dev/`) instantiates modules with environment-specific vars
-- Use case: Create consistent IAM roles, VPCs, EKS clusters across multiple regions/accounts without code duplication
+**Istio `Gateway` + `VirtualService`:**
+- Purpose: Decouple ingress (Gateway listens on host:port with TLS) from routing (VirtualService matches URI prefix).
+- Examples: Gateway in `platform-tools/istio/istio-ingress/base/`; VirtualService in `portfolio/base/virtualservice.yaml`.
+- Pattern: VirtualService binds to `istio-ingress/main-gateway`, routes by URI prefix to in-mesh ClusterIP services.
 
-**Kustomization Resource (Flux + Git Paths):**
-- Purpose: Git-based source of truth for which resources to deploy to cluster
-- Examples: `clusters/dev-projectx/portfolio.yaml`, `clusters/dev-projectx/istio.yaml`, `clusters/dev-projectx/karpenter.yaml`
-- Pattern: Points to kustomize base/overlay directory in Git (e.g., `./portfolio/base`), Flux reconciles on interval and applies manifests
-- Workflow: Change Git → Flux detects → kustomize builds → kubectl apply → cluster converges to Git state
+**Terraform module + root workspace:**
+- Purpose: Reusable infra building blocks consumed by per-environment workspaces.
+- Examples: Module `terraform-infra/eks-cluster/` consumed by `terraform-infra/root/dev/eks/main.tf`; module `terraform-infra/iam-role-module/` with policy JSONs in `Policies/`.
+- Pattern: Root workspace declares `backend.tf` (S3 state), `providers.tf`, `variables.tf`, and a thin `main.tf` calling `module "<name>" { source = "../../../<module>" ... }`.
 
-**Security Groups & Network Policies:**
-- Purpose: Network isolation at cloud (AWS) and Kubernetes layers
-- Examples: `terraform-infra/networking/security-group/` (AWS), `portfolio/base/networkpolicy.yaml` (Kubernetes), `platform-tools/eks-monitoring/base/networkpolicy.yaml` (platform tools)
-- Pattern: AWS security groups control EC2 node-to-node and external traffic; Kubernetes NetworkPolicy enforces pod-to-pod communication rules (namespace boundaries, label selectors)
+**SealedSecret:**
+- Purpose: Encrypted-at-rest secret committed to Git; decrypted only by the in-cluster `sealed-secrets` controller.
+- Example: `HelmCharts/portfolio/templates/sealed-secret.yaml` (SMTP creds → `portfolio-smtp` Secret consumed by api Deployment via `envFrom.secretRef`).
 
-**Service Accounts & IRSA (IAM Roles for Service Accounts):**
-- Purpose: Provide least-privilege AWS IAM permissions to Kubernetes pods
-- Pattern: Kubernetes ServiceAccount linked to IAM role via OIDC provider; Pod assumes role via webhook mutation
-- Use case: Karpenter controller, Velero backup, Flux CD, AWS Load Balancer Controller each have dedicated ServiceAccount + IAM role with only required permissions
+**Image automation (Flux):**
+- Purpose: Auto-bump image tags in Git when a new SHA-tagged image lands in ECR.
+- Examples: `portfolio/image-automation/base/{image-repository,image-policy,image-update-automation}-{web,api}.yaml`.
 
 ## Entry Points
 
-**User Browser → Public Internet:**
-- Location: Route53 → AWS NLB → Istio Gateway public IP (0.0.0.0:8443)
-- Triggers: User navigates to `yedressov.com`
-- Responsibilities: DNS resolution, TLS termination, initial Envoy routing to VirtualService rules
+**Public traffic entry:**
+- Location: Route53 hosted zone (`terraform-infra/dns/route53/`) → NLB → `istio-ingress` Gateway.
+- Triggers: HTTP/HTTPS request to `yedressov.com`.
+- Responsibilities: TLS termination (ACM cert from `terraform-infra/dns/acm/`), Envoy routing.
 
-**Frontend Web Server:**
-- Location: `app/frontend/src/server.js`
-- Triggers: Kubernetes pod startup (initiated by HelmRelease from `portfolio/base/helmrelease.yaml`)
-- Responsibilities: Listen on port 3000, serve EJS templates for portfolio pages, call backend API, respond to /health liveness/readiness probes
+**Frontend pod:**
+- Location: `app/portfolio/frontend/server.js` (started by Dockerfile `CMD`).
+- Triggers: Kubelet starts pod from Deployment `portfolio-frontend` (`HelmCharts/portfolio/templates/02-frontend.yaml`).
+- Responsibilities: Express on `PORT=3000`, helmet CSP, compression, `/health` (independent of backend), `/api/*` proxy to `BACKEND_URL`, static assets from `public/`, SPA fallback to `public/index.html`.
 
-**Backend API Server:**
-- Location: `app/backend/main.py`
-- Triggers: Kubernetes pod startup (initiated by HelmRelease)
-- Responsibilities: Listen on port 8000, serve resume data as JSON endpoints (/api/profile, /api/skills, /api/experience, /api/all), respond to /health probes, enforce rate limiting (60/min), validate request body size (1KB max)
+**Backend pod:**
+- Location: `app/portfolio/api/app.py`.
+- Triggers: Kubelet starts pod from Deployment `portfolio-api`.
+- Responsibilities: Flask on `BACKEND_PORT=5000` (container exposes port 8000 per HelmRelease — values mismatch noted in CONCERNS), `/health` + `/api/health`, `/api/contact` POST handler with rate-limit + SMTP send.
 
-**Terraform Root Workspace:**
-- Location: `terraform-infra/root/dev/` (subdirectories: networking, iam-roles, eks, s3, database, ecr, dns)
-- Triggers: GitHub Actions on main branch push (plan on feature branches, apply on main)
-- Responsibilities: Orchestrate module calls, manage AWS infrastructure state in S3 backend, enforce branch protection CI/CD gates
+**GitOps entry:**
+- Location: `clusters/dev-projectx/flux-system/gotk-sync.yaml` (root GitRepository + Kustomization).
+- Triggers: Flux source-controller polls Git every 1m; root reconciles every 10m.
+- Responsibilities: Pull `clusters/dev-projectx/` and apply all child Kustomizations.
 
-**FluxCD Reconciliation Loop:**
-- Location: `clusters/dev-projectx/` (Kustomization manifests)
-- Triggers: Every 10 minutes (or immediate when Git changes detected)
-- Responsibilities: Clone GitHub repository, apply Kustomization overlays, render HelmReleases, deploy to EKS cluster, auto-rollback on failed upgrade
+**CI entry:**
+- Location: `.github/workflows/portfolio-images.yaml`, `helmchart.yaml`, `deploy-workflow.yaml`, `validation-PT.yaml`.
+- Triggers: `push`/`pull_request` on `main` with path filters.
+- Responsibilities: Build & push images, lint & publish chart, plan/apply Terraform via OIDC role `${{ vars.IAM_ROLE }}`.
 
-**GitHub Actions CI/CD Pipeline:**
-- Location: `.github/workflows/image.yaml` (Docker image build/push), `.github/workflows/deploy-workflow.yaml` (Terraform apply)
-- Triggers: Push to main branch, pull requests
-- Responsibilities: Build/scan Docker images, push to ECR, run Terraform plan/apply, trigger Flux reconciliation
+**Terraform entry:**
+- Location: `terraform-infra/root/dev/<workspace>/` and `terraform-infra/root/prod/<workspace>/`.
+- Triggers: GitHub Actions Terraform job per workspace.
+- Responsibilities: Provision AWS resources, write state to S3.
 
 ## Error Handling
 
-**Application-Level Errors:**
-- Frontend catches backend unreachability, renders error page with fallback message (response status 503, from `app/frontend/src/server.js` line 23-27)
-- Pattern: `try-catch` with axios; silent catch on non-critical health checks (line 40: `catch { }`)
-- Backend returns HTTPException for validation errors, rate-limit errors, request body too large (413 status)
+**Strategy:** Defense in depth — each layer has its own failure domain and recovery loop.
 
-**Container Restart:**
-- Kubernetes liveness probe (HTTP GET `/api/health`) restarts failed container after initialDelaySeconds + periodSeconds
-- Readiness probe ensures traffic only routes to healthy pods
-- Restart policy: `Always` (default) - kubelet restarts pod on crash
-
-**Deployment Rollback:**
-- Helm tracks previous releases; HelmRelease auto-rollback on failed upgrade (Flux feature)
-- Git history provides full audit trail; revert commit → Flux reconciles to previous state
-
-**Pod Disruption Budgets (PDB):**
-- Platform tools (Prometheus, Grafana, EFK) use PDB to ensure minimum replicas during voluntary disruptions (node drains, cluster upgrades)
-
-**IRSA Token Refresh:**
-- EKS automatically refreshes IRSA tokens every 1 hour (default), seamless to pods; no manual credential rotation needed
+**Patterns:**
+- **Application:** Frontend `/health` is independent of backend reachability (intentional, see comment in `app/portfolio/frontend/server.js`). Backend rejects oversized payloads in `before_request` hook (returns 413 before SMTP touched). Proxy errors return 502 with JSON body.
+- **Validation:** Backend validates name/email/subject/message length and email regex before any side effect; rate-limit per IP (5 req / 15 min) returns 429.
+- **Kubernetes:** Liveness/readiness probes on `/health` (frontend) and `/api/health` (backend) drive pod restart and service endpoint inclusion.
+- **Helm/Flux:** HelmRelease auto-rollback on failed upgrade; Flux Kustomizations have `timeout: 5m` and `dependsOn` to fail fast and respect ordering.
+- **Terraform:** Remote state in S3 with branch protection (`required_status_checks`) preventing apply on broken `main`.
+- **CI:** `concurrency` group with `cancel-in-progress: false` prevents image-build races.
 
 ## Cross-Cutting Concerns
 
 **Logging:**
-- All pod stdout automatically collected via container runtime → Fluent Bit → Elasticsearch
-- Istio access logs sent to stdout (configurable in istiod HelmRelease values)
-- Centralized search and visualization in Kibana (platform-tools/efk-logging)
+- App pods write structured-ish logs to stdout (Node `console.*`, Python `logging`).
+- EFK stack (`platform-tools/efk-logging/`) collects, indexes, and visualizes (Kibana).
+- Istio access logs flow through Envoy sidecars to stdout.
 
-**Monitoring & Alerting:**
-- Prometheus scrapes metrics from Envoy sidecars, kubelet, application endpoints (/metrics)
-- Grafana dashboards visualize cluster and application health metrics
-- Alertmanager sends alerts to configured channels (email, Slack, etc.)
-- Thanos provides long-term metric storage (S3 backend in dev, configurable in platform-tools/thanos)
+**Metrics & monitoring:**
+- `platform-tools/eks-monitoring/` (Prometheus stack) scrapes kubelet, Envoy, app endpoints.
+- `platform-tools/thanos/` provides long-term storage in S3 (IRSA via `iam-role-module/Policies/thanos_policy.json`).
 
-**Authorization & Authentication:**
-- Platform tools (Karpenter, Velero, AWS LB Controller, Flux CD) use IRSA to assume AWS roles
-- Frontend-to-backend communication: Istio mTLS automatic (mutual TLS between Envoy sidecars)
-- User → external: TLS 1.2+ via NLB + ACM certificate
-- GitHub Actions uses OIDC token exchange (no long-lived credentials stored in GitHub secrets)
+**Security:**
+- **Identity:** IRSA for in-cluster controllers (Karpenter, AWS LB Controller, Velero, Thanos, image-reflector); GitHub OIDC for CI.
+- **Secrets:** SealedSecrets for app secrets in Git; AWS Secrets Manager for RDS password; never `.env` in containers (dotenv `try/catch`).
+- **Network:** Istio auto-mTLS east-west; helmet CSP at frontend; security groups in `terraform-infra/networking/security-group/`; Flux NetworkPolicy (`clusters/dev-projectx/flux-system/networkpolicy.yaml`).
+- **Policy:** Kyverno (`platform-tools/kyverno/`) enforces cluster-wide admission policies.
+- **Supply chain:** Branch protection requires `publish-images` + `terraform (iam-roles)` status checks; image tags are immutable SHAs; chart pinned by version.
 
-**Network Security:**
-- External (user → NLB): TLS 1.2+ via ACM certificate on NLB
-- Service mesh (pod → pod): Automatic mTLS via Istio (enableAutoMtls: true in istiod config)
-- Node-to-node: AWS security groups restrict traffic to Kubernetes API, kubelet, CNI
-- Pod-to-pod: Kubernetes NetworkPolicy enforces communication rules within namespaces (deny-all default, explicit allow rules)
+**Backup & DR:**
+- Velero (`platform-tools/velero/`) snapshots cluster resources/PVs to S3 (IRSA via `velero_policy.json`).
 
-**Resource Management:**
-- Frontend/backend pods: CPU requests 100m, limits 250m; memory requests 128Mi, limits 256Mi
-- Platform tools resource limits configurable via Kustomize overlays (dev vs prod)
-- Karpenter autoscaler provisions nodes based on pending pod requests, terminates idle nodes
+**Autoscaling:**
+- Karpenter (`platform-tools/karpenter/`) provisions nodes on-demand; NodePools split into a separate Flux Kustomization (`karpenter-nodepool` `dependsOn: karpenter`).
 
-**Configuration Management:**
-- Environment variables: `API_URL` passed to frontend deployment via HelmRelease values (`portfolio/base/helmrelease.yaml` line 32)
-- Secrets: RDS password stored in AWS Secrets Manager, referenced by Terraform
-- GitOps configuration: All app and platform tool deployments via HelmRelease CRD (Git as SSOT)
-- Sealed Secrets: Sensitive cluster config encrypted before Git commit, decrypted by cluster sealed-secrets controller
+**Authentication & authorization:**
+- EKS access via Access Entries (`terraform-infra/eks-cluster/access-entries.tf`) — `authentication_mode` configurable.
+- Cluster API endpoint is `endpoint_public_access = true` (see `terraform-infra/eks-cluster/eks.tf` — flag for security review).
+
+---
+
+*Architecture analysis: 2026-04-15*

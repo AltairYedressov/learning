@@ -2,304 +2,207 @@
 
 **Analysis Date:** 2026-04-15
 
+This brownfield AWS EKS project spans four primary languages (JavaScript, Python, HCL/Terraform, YAML) plus shell. No automated linters or formatters are configured in the repo for application code; conventions below are derived from observed patterns in the source tree.
+
 ## Naming Patterns
 
-**Files:**
-- JavaScript/Node.js: kebab-case or camelCase
-  - Examples: `server.js`, `package.json`, `main.js`
-  - Express apps use simple lowercase names: `server.js`, `app.js`
-- Python: lowercase_with_underscores
-  - Examples: `main.py`, `app.py`, `requirements.txt`
-  - Test files: `test_*.py` (e.g., `test_security.py`)
-- Terraform: lowercase_with_underscores with logical file grouping
-  - Examples: `main.tf`, `variables.tf`, `outputs.tf`, `data-blocks.tf`
-- YAML/Kubernetes: kebab-case for resources and properties
-  - Examples: `portfolio-api`, `portfolio-frontend`, `app: portfolio-api`, `tier: backend`
+### Files
+- **JavaScript:** lowercase `.js` files at module root, e.g. `app/portfolio/frontend/server.js`
+- **Python:** lowercase `.py` files, single module per concern, e.g. `app/portfolio/api/app.py`
+- **Terraform:** split per concern in each module: `main.tf`, `variables.tf`, `outputs.tf`, `data-blocks.tf` (e.g. `terraform-infra/database/`)
+- **YAML/Kubernetes:** lowercase with hyphens, often number-prefixed for ordering (`01-backend.yaml`, `02-frontend.yaml`); kustomize entrypoint `kustomization.yaml`
+- **Helm templates:** `HelmCharts/portfolio/templates/` — kebab-case template files
+- **Shell scripts:** kebab-case verb-noun (`scripts/cluster-creation.sh`, `scripts/bootstrap-flux.sh`, `scripts/destroy-cluster.sh`, `scripts/validation.sh`)
+- **GitHub workflows:** kebab-case `.yaml` (`.github/workflows/portfolio-images.yaml`, `deploy-workflow.yaml`, `helmchart.yaml`, `validation-PT.yaml`)
 
-**Functions & Routes:**
-- JavaScript (Express): camelCase for regular functions, lowercase REST verbs for routes
-  - Route handlers: `app.get()`, `app.post()`, `app.listen()`
-  - Arrow functions: `async (req, res)` or `(req, res, next)` middleware pattern
-- Python (FastAPI/Flask): snake_case for all functions
-  - Route handlers: `def get_profile()`, `def health()`, `def contact()`
-  - Decorator pattern: `@app.get()`, `@app.post()`
-- Python class names: PascalCase
-  - Examples: `class Profile(BaseModel)`, `class HealthCheck(BaseModel)`, `class LimitRequestBodyMiddleware`
+### Functions
+- **JavaScript:** camelCase; arrow callbacks `(req, res) => {...}`. Express handlers inline. Example: `app/portfolio/frontend/server.js`
+- **Python:** snake_case; private helpers prefixed with underscore (`_is_rate_limited`, `_validate_payload`, `_send_email`, `_enforce_body_cap` in `app/portfolio/api/app.py`)
+- **Terraform:** snake_case for resource names (`aws_db_instance.default`, `aws_s3_bucket.terraform_state`)
 
-**Variables:**
-- JavaScript: camelCase (const/let)
-  - Examples: `const API_URL`, `const PORT`, `let started = false`
-  - Constants: UPPER_CASE if exported globally
-- Python: snake_case
-  - Examples: `PROFILE`, `SKILLS`, `EXPERIENCE`, `_rate_store`, `client_ip`
-  - Constants: UPPER_CASE
-  - Private/internal: prefix with underscore (`_validate_payload()`, `_send_email()`)
-- Terraform: UPPER_CASE for input variables, lowercase for resource references
-  - Examples: `var.allocated_storage`, `aws_db_instance.default`
+### Variables / Constants
+- **JavaScript:** camelCase locals (`const app`), UPPER_SNAKE for env-derived constants (`const PORT`, `const BACKEND_URL`)
+- **Python:** snake_case locals; UPPER_SNAKE for module-level config constants (`SMTP_HOST`, `RATE_LIMIT`, `EMAIL_RE`)
+- **Terraform:** snake_case for variable inputs (`var.allocated_storage`, `var.engine_version`); legacy UPPER_SNAKE survives in some places (`var.ACCOUNT_ID`)
 
-**Type & Data Model Names:**
-- Pydantic models: PascalCase
-  - Examples: `class Skill(BaseModel)`, `class Experience(BaseModel)`, `class HealthCheck(BaseModel)`
-- Type hints: Python `typing` module
-  - Examples: `List[str]`, `Optional[str]`, `List[Skill]`, `dict[str, list[datetime]]`
-- Kubernetes labels: kebab-case with lowercase values
-  - Examples: `app: portfolio-api`, `tier: backend`, `namespace: portfolio`
+### Types / Models
+- **Python:** PascalCase classes (Pydantic in legacy `app/backend/main.py`); current Flask app uses plain dicts validated by `_validate_payload`
+- **Type hints:** Modern syntax (`dict[str, list[datetime]]`) in `app/portfolio/api/app.py`
+
+### Kubernetes / Helm
+- Labels: kebab-case (`app: portfolio-api`, `tier: backend`)
+- Helm value paths: camelCase keys nested under semantic groups (`{{ .Values.namespace.name }}`)
 
 ## Code Style
 
-**Formatting:**
-- JavaScript: 2-space indentation
-  - Express app structure with clear sections marked by comments
-  - Example: `// ── Main route ──────────────────────────────────────────────────────────────`
-- Python: 4-space indentation (PEP 8)
-  - Example: `app/backend/main.py` follows standard Python indentation
-- Terraform: 2-space indentation in block structures
-  - Example: `terraform-infra/database/main.tf` uses 2-space indents for nested blocks
-- YAML/Kubernetes: 2-space indentation for all manifest files
-  - Example: `HelmCharts/portfolio/templates/*.yaml` consistently use 2-space indents
+### Formatting
+- **JavaScript:** 2-space indent, double-quoted strings, semicolons present
+- **Python:** 4-space indent (PEP 8), double-quoted strings preferred, blank lines between logical sections
+- **Terraform:** 2-space indent, aligned `=` within blocks, comment-grouped attribute clusters (`# storage`, `# engine`, `# network`)
+- **YAML:** 2-space indent throughout
 
-**Linting:**
-- Not detected - No `.eslintrc`, `.prettierrc`, `pyproject.toml`, or similar config files found
-- Code follows common conventions but no enforced linting rules
-- Visual separators used throughout codebase for code organization
+### Linting / Formatting Tools
+- **No `.eslintrc`, `.prettierrc`, `pyproject.toml`, `ruff.toml`, or `.editorconfig`** present at repo root
+- **Terraform:** `terraform fmt -check` and `terraform validate` enforced in `.github/workflows/deploy-workflow.yaml`
+- **Helm:** `helm lint` and `helm template` smoke render enforced in `.github/workflows/helmchart.yaml`
+- **IaC security:** Checkov scans Terraform in `deploy-workflow.yaml` (`checkov --directory . --framework terraform --output cli --compact`)
+- **Application code (JS/Python):** No lint, format, or type-check step in any workflow
 
-**Comments:**
-- ASCII art visual separators consistently used to organize code sections
-  - JavaScript: `// ── Section Name ────────────────────────────────────────────`
-  - Python: `# ── Section Name ────────────────────────────────────────────`
-  - Terraform: `# ── Section Name ────────────────────────────────────────────`
-  - YAML: `# ── Section Name ────────────────────────────────────────────`
-- Module docstrings at top of files describe purpose
-  - Python: Triple-quoted docstring at module level
-    - Example: `"""Altair Yedressov — Portfolio API (Python / FastAPI)..."""`
-  - JavaScript: Block comments at top
-    - Example: `/** Altair Yedressov — Portfolio Frontend...*/`
-- Minimal inline documentation; function names and type hints carry the meaning
-- No over-commenting pattern — only clarifications where logic is not obvious
+### Section Separators
+- **Python:** `# ---------------------------------------------------------------------------` block separators with section title underneath, e.g. `# Configuration`, `# Validation helpers`, `# Routes` in `app/portfolio/api/app.py`
+- **JavaScript:** `// ── Section Name ───────────────` Unicode box-drawing separators in `app/portfolio/frontend/server.js`
+- **Terraform:** `# storage`, `# engine`, `# network` short comments to group related attributes
 
 ## Import Organization
 
-**JavaScript/Node.js:**
-1. Framework imports (`const express = require("express")`)
-2. Third-party packages (`const axios = require("axios")`)
-3. Standard library (`const path = require("path")`)
-4. Local imports (relative paths if any)
+### Python (`app/portfolio/api/app.py`)
+1. Stdlib (`os`, `re`, `smtplib`, `logging`, `email.*`, `datetime`, `collections`)
+2. Blank line
+3. Third-party (`flask`, `flask_cors`, `dotenv`)
+- Specific imports preferred over wildcard
 
-Example from `app/frontend/src/server.js`:
-```javascript
-const express = require("express");
-const axios = require("axios");
-const path = require("path");
-```
+### JavaScript (`app/portfolio/frontend/server.js`)
+- Optional `require("dotenv").config()` wrapped in `try/catch` (container-safe)
+- `require()` calls grouped at top
+- Destructuring used for sub-imports: `const { createProxyMiddleware } = require("http-proxy-middleware")`
 
-**Python:**
-1. Standard library imports (`import os`, `import re`, `from datetime import...`)
-2. Third-party packages (`from fastapi import FastAPI`, `from pydantic import BaseModel`)
-3. Type imports separated (`from typing import List, Optional`)
-
-Example from `app/backend/main.py`:
-```python
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import List, Optional
-import datetime
-```
-
-**Path Aliases:**
-- Not detected - No TypeScript or JavaScript path aliases configured
-- All imports use relative/standard library paths
+### Path Aliases
+- None configured (no `tsconfig.json`, no Babel/webpack alias)
 
 ## Error Handling
 
-**JavaScript/Express:**
-- Try-catch blocks with async handlers
-- Pattern: Catch block logs error with `console.error()` and returns HTTP status with fallback response
-- Example from `app/frontend/src/server.js`:
-  ```javascript
-  try {
-    const { data } = await axios.get(`${API_URL}/api/all`);
-    res.render("index", { data });
-  } catch (err) {
-    console.error("Backend API unreachable:", err.message);
-    res.status(503).render("error", {
-      message: "Backend API is unreachable...",
-    });
-  }
+### JavaScript
+- Proxy errors caught via `onError` callback returning HTTP 502 with structured JSON: `res.status(502).json({ success: false, error: "Backend service unavailable." })`
+- Optional dependencies wrapped in `try { ... } catch (_) { /* comment */ }`
+- Errors logged via `console.error` with bracketed prefix: `[Proxy Error] ${err.message}`
+
+### Python (Flask)
+- Error responses are uniform: `jsonify({"success": False, "error": "..."}), <status>` for single errors, `{"success": False, "errors": [...]}` for multi-field validation
+- Status codes used: 400 (validation), 413 (oversize), 429 (rate limit), 500 (SMTP failure), 502 not used here
+- `@app.errorhandler(413)` registered for body-cap overflow
+- `@app.before_request` hook enforces ordering invariants (rate-limiter never sees oversized payloads — see SEC-07 ordering note in `app/portfolio/api/app.py:155`)
+- Outer `try/except Exception as exc` wraps SMTP send; logs and returns generic 500 (no stack leak to client)
+
+### Terraform / Kubernetes
+- Failure surfaces via tooling exit codes (terraform plan/apply, helm lint, flux reconciliation)
+- App-level fallback: HelmRelease auto-rollback on failed upgrade
+- Liveness/readiness via `/health` endpoints on both services (frontend `/health` deliberately does NOT proxy upstream — independence requirement noted in `server.js:37`)
+
+## Logging
+
+### Python
+- Stdlib `logging` configured at `INFO`: `logging.basicConfig(level=logging.INFO)`; module logger via `logging.getLogger(__name__)`
+- Log messages use bracketed tag prefix: `logger.info(f"[CONTACT] Email sent — from {email}, subject: {subject}")`
+- Levels used: `info` (success path), `warning` (degraded/dev mode), `error` (caught exceptions)
+- f-strings throughout (acceptable here; not security-sensitive)
+
+### JavaScript
+- `console.log` and `console.error` only — no structured logger
+- Startup banner uses `✦` emoji prefix:
   ```
-- Silent catch (no error logging) used for non-critical failures
-  - Example: `app/frontend/src/server.js` line 40: `catch { }` for degraded state
-- HTTP status codes follow REST conventions: 503 for service unavailable
-- Proxy error handlers use `console.error()` with descriptive context
-  - Example from `app/portfolio/frontend/server.js`: `console.error(\`[Proxy Error] ${err.message}\`)`
+  ✦  Frontend  → http://localhost:3000
+  ✦  Backend   → http://localhost:5000
+  ```
+- Error prefix: `[Proxy Error]`
 
-**Python/FastAPI:**
-- HTTPException raised for errors with appropriate status codes
-  - Import: `from fastapi import HTTPException`
-  - Example: Return 429 for rate limit, 413 for body too large, 404 for not found
-- Pydantic validation built-in: Invalid data rejected by BaseModel validation
-- Middleware-based approach for cross-cutting concerns (rate limiting, body size, CORS)
-- Python Flask uses logging for errors:
-  - `logger.warning()` for non-critical (e.g., SMTP not configured in dev)
-  - `logger.error()` for actual failures
-  - `logger.info()` for successful operations
-  - Example from `app/portfolio/backend/app.py`:
-    ```python
-    except Exception as exc:
-        logger.error(f"[CONTACT] Failed to send email: {exc}")
-        return jsonify({...}), 500
-    ```
+### Shell
+- `echo` with banner separators (`echo "================="`)
+- `>>>` prefix for status lines, trailing `✅` / `❌` for outcome (see `scripts/validation.sh`)
 
-**Logging Strategy:**
-- JavaScript: `console.log()` for info, `console.error()` for errors
-  - Pattern: Information-level logs with emoji prefix (`✦`)
-    - Example: `console.log(\`✦  Frontend running → http://localhost:${PORT}\`)`
-- Python: Standard `logging` module with `logger` instance
-  - Structured: `logger.info()`, `logger.warning()`, `logger.error()`
-  - Prefix pattern: `[CONTEXT]` in log message for categorization
-- No structured logging framework (e.g., Winston, Pino) detected in JavaScript
-- Environment-based verbosity: Flask checks `NODE_ENV` or `FLASK_DEBUG`
+### Cluster
+- Pods log to stdout; collected by EFK; Istio access logs via istiod values
 
 ## Function Design
 
-**JavaScript/Express:**
-- Express middleware pattern with `(req, res)` or `(req, res, next)` signatures
-- Route handlers are arrow functions or named async functions
-- Response methods: `res.render()` for templating, `res.json()` for JSON, `res.status()` for HTTP status
-- Example from `app/frontend/src/server.js`:
-  ```javascript
-  app.get("/", async (req, res) => {
-    try {
-      const { data } = await axios.get(`${API_URL}/api/all`);
-      res.render("index", { data });
-    } catch (err) {
-      ...
-    }
-  });
-  ```
-
-**Python/FastAPI:**
-- FastAPI handlers do not take request parameters directly in function signature
-- Use `response_model` for automatic type validation and serialization
-- Return native Python objects or Pydantic models (auto-serialized to JSON)
-- Decorator-based routing: `@app.get()`, `@app.post()` at function level
-- Example from `app/backend/main.py`:
-  ```python
-  @app.get("/api/profile", response_model=Profile)
-  def get_profile(request: Request):
-      return PROFILE
-  ```
-- Flask uses similar decorator pattern but with explicit `request` context:
-  ```python
-  @app.route("/api/contact", methods=["POST"])
-  def contact():
-      data = request.get_json(silent=True) or {}
-  ```
-
-**Python/Flask:**
-- Request body extraction via `request.get_json(silent=True)`
-- Return `jsonify()` for JSON responses, tuples for (data, status_code)
-- Validation helpers are standalone functions (snake_case, prefixed with underscore if internal)
-  - Example: `def _validate_payload(data: dict) -> list[str]`
+- **Python helpers private by convention:** leading underscore (`_send_email`, `_validate_payload`)
+- **Single-responsibility:** validation, rate-limit, SMTP build, and route handler kept in separate functions in `app/portfolio/api/app.py`
+- **Type hints on helpers** (`def _is_rate_limited(ip: str) -> bool:`); Flask routes untyped (Flask convention)
+- **JS handlers** are inline arrows; no extracted controller layer
 
 ## Module Design
 
-**JavaScript:**
-- Single app instance used throughout: `const app = express()`
-- All routes attached to app: `app.get()`, `app.listen()`
-- Middleware added via `app.use()` before routes that need it
-- Single file structure for small services (`server.js` monolithic)
+- Each app is a single-file service (`server.js`, `app.py`) — monolithic but small
+- Terraform splits by file role within a module; modules under `terraform-infra/` are reusable building blocks (`iam-role-module`, `networking/vpc-module`)
+- Kubernetes manifests organized by base/overlay (`portfolio/base/`) and consumed via Flux Kustomization in `clusters/dev-projectx/`
+- No barrel files / aggregated exports
 
-**Python:**
-- Single FastAPI app instance: `app = FastAPI(...)`
-- All routes attached to app: `@app.get()`, `@app.post()`
-- Middleware added via `app.add_middleware()` in order (last added = outermost = runs first)
-- Monolithic single-file structure with ASCII comment sections for logical separation
-  - Example from `app/backend/main.py`:
-    ```python
-    # ── Data Models ──────────────────────────────────────────────────────────────
-    # ── Static Data (from resume) ───────────────────────────────────────────────
-    # ── Endpoints ────────────────────────────────────────────────────────────────
-    ```
+## Configuration
 
-**Terraform:**
-- Multiple files per concern (logical separation)
-  - `main.tf`: Primary resource definitions
-  - `variables.tf`: Input variable declarations with descriptions
-  - `outputs.tf`: Output declarations
-  - `data-blocks.tf`: Data source queries
-- No barrel files or aggregated exports
+### Application Configuration
+- **All runtime config via env vars with safe defaults:**
+  - JS: `process.env.PORT || 3000`, `process.env.BACKEND_URL || "http://localhost:5000"`
+  - Python: `os.getenv("SMTP_HOST", "smtp.gmail.com")`, `int(os.getenv("RATE_LIMIT", 5))`
+- `.env` loading is **optional** — wrapped in `try/catch` in JS, `load_dotenv()` no-ops if missing in Python
+- Secrets sourced from Kubernetes Sealed Secrets (see commit `cbf24b9`); never committed in plaintext
 
-**Kubernetes/YAML:**
-- Multiple manifests per concern (logical separation via filenames)
-  - Numbered prefixes for ordering: `01-backend.yaml`, `02-frontend.yaml`
-  - Each manifest may contain multiple Kubernetes resources (Deployment, Service, etc.)
-  - Visual section separators in comments: `# ── Backend Deployment ─────────`
-- Consistent metadata structure: `name`, `namespace`, `labels`
-- Template variable injection via Helm: `{{ .Values.namespace.name }}`
+### Terraform Configuration
+- One file per concern within a module (`main.tf`, `variables.tf`, `outputs.tf`, `data-blocks.tf`)
+- Variables documented with `description`; resources tagged with `Environment` and `Name`
+- Backend config injected at `terraform init` via `-backend-config="bucket=${AWS_ACCOUNT_ID}-terraform-state-${ENV}"`
+- Root workspaces under `terraform-infra/root/<env>/<stack>/` (dev/prod separation)
 
-## Data Models
+### Kubernetes Configuration
+- Helm `values.yaml` for chart defaults; HelmRelease overrides per cluster
+- Image tags pinned to git SHA via CI (`${{ github.sha }}` in `portfolio-images.yaml`); never `:latest`
 
-**Python/Pydantic:**
-- All data models extend `BaseModel`
-- Type hints required on all fields
-- Optional fields marked with `Optional[FieldType]` or default values
-- Example from `app/backend/main.py`:
-  ```python
-  class Profile(BaseModel):
-      name: str
-      title: str
-      email: str
-      phone: str
-      location: str
-      linkedin: str
-      github: str
-      summary: str
-  ```
-- Consistent use of `List[T]` for collections
-  - Example: `items: List[str]`, `highlights: List[str]`
-- `.dict()` method used to convert models to dictionaries for JSON serialization
-  - Example: `PROFILE.dict()`, `[s.dict() for s in SKILLS]`
+## Commit Patterns
 
-**JavaScript:**
-- No TypeScript in use — plain JavaScript
-- No type system; relies on runtime behavior
-- Object destructuring common: `const { data } = await axios.get()`
-- Dynamic object creation with properties: `{ status, service, version, timestamp }`
+Conventional Commits in active use. Observed prefixes (last 25 commits):
 
-## Configuration Files
+| Prefix | Use |
+|--------|-----|
+| `feat(scope):` | new functionality (`feat(portfolio): wire SealedSecret SMTP creds`) |
+| `fix(scope):` | bug fix (`fix(portfolio): align backend BACKEND_PORT with chart Service port 8000`) |
+| `chore(scope):` | infra/CI/non-functional (`chore(portfolio): rename backend→api`) |
+| `ci:` | workflow changes (`ci: extend terraform deploy matrix`) |
+| `revert:` / `Revert "..."` | rollback |
+| `docs:` | (used historically) |
 
-**Terraform:**
-- Configuration split across logical files: `main.tf`, `variables.tf`, `outputs.tf`, `data-blocks.tf`
-- Variables documented with `description` field in `variables.tf`
-- Resources tagged with `Environment` and `Name` labels
-- Consistent use of interpolation: `"${var.ACCOUNT_ID}-terraform-state-dev"`
-- Data blocks in separate file for clarity
-- Example structure from `terraform-infra/database/`:
-  - `main.tf`: AWS RDS instance, subnet group, parameter group
-  - `variables.tf`: All input variables with descriptions
-  - `outputs.tf`: Outputs for downstream modules
-  - `data-blocks.tf`: VPC, subnet, security group lookups
+- Scopes: `portfolio`, `chart`, `api`, none (root-level)
+- Subject in imperative mood, lowercase after the colon, no trailing period
+- Merge commits used for PR integration (`Merge pull request #98 from AltairYedressov/feature/...`)
+- Branch names: `feature/<descriptor>` (e.g. `feature/PT**` triggers ephemeral test workflow; `feature/portfolio-v2-cutover`)
+- "Retrigger" commits are common — indicates CI re-run via empty/no-op commit (consider workflow_dispatch instead)
 
-**YAML/Kubernetes:**
-- YAML manifests follow standard Kubernetes API conventions
-- Metadata includes `name`, `namespace`, `labels` with consistent app labels
-- Labels follow pattern: `app: service-name`, `tier: frontend|backend`
-- Resources templated with Helm: `{{ .Values.namespace.name }}`
-- Comments use visual separators: `# ── Section Name ────────────────────`
-- Multi-resource files separated by `---` delimiter
-- Examples from `HelmCharts/portfolio/templates/01-backend.yaml`:
-  - Deployment with security context, probes, resource limits
-  - Service with selector matching deployment labels
-  - Each section clearly marked with comment blocks
+## File Organization
 
-**Environment Configuration:**
-- JavaScript: Read with `process.env.PORT`, `process.env.API_URL` with fallback defaults
-  - Example: `const PORT = process.env.PORT || 3000`
-- Python: `os.getenv()` for environment variables or `load_dotenv()` from .env files
-  - Not extensively used in current code; hardcoded defaults in function signatures
-- Framework configuration via environment-based conditional logic
-  - Example from Flask: `if process.env.NODE_ENV === "production" ? "7d" : 0`
+### Repo Top Level
+```
+app/                  # Application source (portfolio/{api,frontend})
+HelmCharts/           # Helm chart sources (portfolio/)
+clusters/             # Flux Kustomizations per cluster (dev-projectx, test)
+platform-tools/       # Cluster-wide tooling manifests (istio, karpenter, etc.)
+portfolio/            # Application kustomize base/overlays
+terraform-infra/      # IaC modules + root workspaces
+scripts/              # Bash helpers for cluster lifecycle and validation
+.github/workflows/    # CI/CD pipelines
+docs/                 # Documentation
+```
+
+### Application Layout
+- Each service self-contained: `app/portfolio/<service>/{Dockerfile, app.py|server.js, requirements.txt|package.json}`
+- No `src/` subdirectory inside services — flat layout
+
+### Terraform Layout
+- Reusable modules at `terraform-infra/<concern>/` (e.g. `database/`, `networking/vpc-module/`)
+- Root workspaces at `terraform-infra/root/<env>/<stack>/` (dev/eks, dev/networking, etc.)
+
+### Kubernetes Layout
+- Base manifests: `portfolio/base/`, `platform-tools/<tool>/<namespace>/base/`
+- Cluster bindings: `clusters/dev-projectx/<app>.yaml` references the base via Flux Kustomization
+
+## Where to Add New Code
+
+| Need | Location |
+|------|----------|
+| New REST endpoint (Python API) | `app/portfolio/api/app.py` (single file) |
+| New frontend route or proxy rule | `app/portfolio/frontend/server.js` |
+| New AWS resource (reusable) | New module under `terraform-infra/<concern>/` |
+| New AWS resource (consumer) | `terraform-infra/root/<env>/<stack>/main.tf` |
+| New Helm template | `HelmCharts/portfolio/templates/<resource>.yaml` |
+| New Flux-managed app | `clusters/dev-projectx/<app>.yaml` + base under `platform-tools/` or `portfolio/` |
+| New CI job | `.github/workflows/<name>.yaml` (kebab-case) |
+| New cluster lifecycle helper | `scripts/<verb>-<noun>.sh`, `chmod +x` |
 
 ---
 
