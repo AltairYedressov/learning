@@ -22,12 +22,12 @@ Derived from `.planning/PROJECT.md`. REQ-IDs are stable handles used by ROADMAP.
 
 ### Security (SEC)
 
-- [ ] **SEC-01**: CORS on the backend is restricted to `https://yedressov.com` (and `http://localhost:3000` for dev) — no wildcards.
+- [x] **SEC-01**: CORS on the backend is restricted to `https://yedressov.com` (and `http://localhost:3000` for dev) — no wildcards.
 - [ ] **SEC-02**: SMTP credentials are stored as a Sealed Secret encrypted to the cluster's controller key, committed to Git under the Helm chart or `clusters/dev-projectx/`.
-- [ ] **SEC-03**: The K8s Secret decrypted from the Sealed Secret is mounted into the backend pod via `envFrom.secretRef` — no credentials baked into images or chart values.
-- [ ] **SEC-04**: Both pods run as non-root, with a restrictive `securityContext` (readOnlyRootFilesystem where feasible, no privilege escalation, drop all capabilities), satisfying the cluster's Kyverno PSS-Restricted policy.
+- [x] **SEC-03**: The K8s Secret decrypted from the Sealed Secret is mounted into the backend pod via `envFrom.secretRef` — no credentials baked into images or chart values.
+- [x] **SEC-04**: Both pods run as non-root, with a restrictive `securityContext` (readOnlyRootFilesystem where feasible, no privilege escalation, drop all capabilities), satisfying the cluster's Kyverno PSS-Restricted policy.
 - [ ] **SEC-05**: Frontend uses `helmet()` middleware with CSP appropriate for the static site (no inline scripts outside what the bundled pages ship).
-- [ ] **SEC-06**: Network policy (or Istio AuthorizationPolicy) limits backend ingress to traffic from the frontend pod and the ingress gateway only.
+- [x] **SEC-06**: Network policy (or Istio AuthorizationPolicy) limits backend ingress to traffic from the frontend pod and the ingress gateway only.
 - [ ] **SEC-07**: Backend denies requests exceeding `MAX_BODY_SIZE` with HTTP 413 before parsing.
 
 ### Secrets Management (SMS)
@@ -38,11 +38,11 @@ Derived from `.planning/PROJECT.md`. REQ-IDs are stable handles used by ROADMAP.
 
 ### Deployment (DEP)
 
-- [ ] **DEP-01**: `HelmCharts/portfolio/` (or a replacement chart) is updated to deploy the new `portfolio-web` (frontend) and `portfolio-api` (backend) with correct image refs, probes, resources, and security context.
-- [ ] **DEP-02**: Istio VirtualService routes `/api/` to `portfolio-api:5000` and all other paths to `portfolio-web:3000`, both bound to the existing Istio Gateway at `yedressov.com`.
-- [ ] **DEP-03**: Flux Kustomization in `clusters/dev-projectx/portfolio.yaml` reconciles the updated HelmRelease on every push to `main`.
-- [ ] **DEP-04**: Old FastAPI backend (`app/backend/`) and EJS frontend (`app/frontend/`) manifests are removed from the Helm chart; source trees can remain until post-deploy cleanup.
-- [ ] **DEP-05**: Resource requests/limits are set conservatively (CPU 100m req / 250m limit, Mem 128Mi req / 256Mi limit per pod, tunable).
+- [x] **DEP-01**: `HelmCharts/portfolio/` (or a replacement chart) is updated to deploy the new `portfolio-web` (frontend) and `portfolio-api` (backend) with correct image refs, probes, resources, and security context.
+- [x] **DEP-02**: Istio VirtualService routes `/api/` to `portfolio-api:5000` and all other paths to `portfolio-web:3000`, both bound to the existing Istio Gateway at `yedressov.com`.
+- [x] **DEP-03**: Flux Kustomization in `clusters/dev-projectx/portfolio.yaml` reconciles the updated HelmRelease on every push to `main`.
+- [x] **DEP-04**: Old FastAPI backend (`app/backend/`) and EJS frontend (`app/frontend/`) manifests are removed from the Helm chart; source trees can remain until post-deploy cleanup.
+- [x] **DEP-05**: Resource requests/limits are set conservatively (CPU 100m req / 250m limit, Mem 128Mi req / 256Mi limit per pod, tunable).
 
 ### CI / Image Registry (CI)
 

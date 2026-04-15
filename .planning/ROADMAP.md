@@ -55,7 +55,7 @@
   4. The Istio VirtualService bound to the existing `yedressov.com` Gateway sends `/api/*` to `portfolio-api:5000` and everything else to `portfolio-web:3000`.
   5. Flux reconciles the updated `clusters/dev-projectx/portfolio.yaml`, old FastAPI/EJS Deployments and Services are removed from the chart, and only the new workloads are rendered.
 **Plans**: 6 plans
-- [ ] 03-01-PLAN.md — Chart values.yaml + backend template (port 5000, /health, envFrom portfolio-smtp, explicit env, SAs)
+- [x] 03-01-PLAN.md — Chart values.yaml + backend template (port 5000, /health, envFrom portfolio-smtp, explicit env, SAs)
 - [ ] 03-02-PLAN.md — Chart frontend template rename portfolio-frontend→portfolio-web (port 3000, /health, env, SA)
 - [ ] 03-03-PLAN.md — portfolio/base rewrite (HelmRelease values, VirtualService, NetworkPolicy rename+5000, new AuthorizationPolicy)
 - [ ] 03-04-PLAN.md — Chart publish workflow (helm lint/package/push to OCI ECR on HelmCharts/portfolio/** changes)
