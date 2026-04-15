@@ -18,39 +18,11 @@ spec:
         app: portfolio-api
         tier: backend
     spec:
-      serviceAccountName: {{ .Values.serviceAccount.api | default "portfolio-api" }}
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1001
-        runAsGroup: 1001
-        fsGroup: 1001
-        seccompProfile:
-          type: RuntimeDefault
       containers:
         - name: api
           image: {{ .Values.images.api }}
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop:
-                - ALL
           ports:
             - containerPort: {{ .Values.ports.api }}
-          envFrom:
-            - secretRef:
-                name: portfolio-smtp
-          env:
-            - name: BACKEND_PORT
-              value: {{ .Values.ports.api | quote }}
-            - name: ALLOWED_ORIGINS
-              value: {{ .Values.config.allowedOrigins | quote }}
-            - name: RATE_LIMIT
-              value: {{ .Values.config.rateLimit | quote }}
-            - name: RATE_WINDOW_MINUTES
-              value: {{ .Values.config.rateWindowMinutes | quote }}
-            - name: MAX_BODY_BYTES
-              value: {{ .Values.config.maxBodyBytes | quote }}
           resources:
             requests:
               cpu: {{ .Values.resources.api.requests.cpu }}
@@ -60,23 +32,16 @@ spec:
               memory: {{ .Values.resources.api.limits.memory }}
           livenessProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: {{ .Values.ports.api }}
             initialDelaySeconds: 10
             periodSeconds: 15
           readinessProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: {{ .Values.ports.api }}
             initialDelaySeconds: 5
             periodSeconds: 10
-          volumeMounts:
-            - name: tmp
-              mountPath: /tmp
-      volumes:
-        - name: tmp
-          emptyDir:
-            sizeLimit: 100Mi
 ---
 # ── Backend Service (ClusterIP — internal only) ─────────────────────────────
 apiVersion: v1

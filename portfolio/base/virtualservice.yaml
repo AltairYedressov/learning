@@ -16,9 +16,9 @@ spec:
         - destination:
             host: portfolio-api
             port:
-              number: 5000
+              number: 8000
     - route:
         - destination:
-            host: portfolio-web
+            host: portfolio-frontend
             port:
               number: 3000

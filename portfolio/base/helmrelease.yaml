@@ -18,28 +18,18 @@ spec:
 
     replicas:
       api: 2
-      web: 2
+      frontend: 2
 
     images:
-      api: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-api:PLACEHOLDER # {"$imagepolicy": "flux-system:portfolio-api"}
-      web: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-web:PLACEHOLDER # {"$imagepolicy": "flux-system:portfolio-web"}
+      api: 372517046622.dkr.ecr.us-east-1.amazonaws.com/images/portfolio-backend:5e83c60
+      frontend: 372517046622.dkr.ecr.us-east-1.amazonaws.com/images/portfolio-frontend:5e83c60
 
     ports:
-      api: 5000
-      web: 3000
+      api: 8000
+      frontend: 3000
 
     api:
-      url: "http://portfolio-api.portfolio.svc.cluster.local:5000"
-
-    config:
-      allowedOrigins: "https://yedressov.com,http://localhost:3000"
-      rateLimit: "5"
-      rateWindowMinutes: "15"
-      maxBodyBytes: "16384"
-
-    serviceAccount:
-      api: portfolio-api
-      web: portfolio-web
+      url: "http://portfolio-api.portfolio.svc.cluster.local:8000"
 
     resources:
       api:
@@ -49,7 +39,7 @@ spec:
         limits:
           cpu: 250m
           memory: 256Mi
-      web:
+      frontend:
         requests:
           cpu: 100m
           memory: 128Mi
