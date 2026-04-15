@@ -26,6 +26,7 @@ app.use(
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:"],
         connectSrc: ["'self'", BACKEND_URL],
+        mediaSrc: ["'self'"],
       },
     },
   })
