@@ -4,7 +4,7 @@ This directory contains the portfolio application source.
 
 ## Layout
 
-- `portfolio/backend/` — Flask API (image: `portfolio-api`). Hardened non-root container; see Phase 1 summary in `.planning/phases/01-package-local-verify/01-SUMMARY.md` for build + verify details.
+- `portfolio/api/` — Flask API (image: `portfolio-api`). Hardened non-root container; see Phase 1 summary in `.planning/phases/01-package-local-verify/01-SUMMARY.md` for build + verify details.
 - `portfolio/frontend/` — Express web server (image: `portfolio-web`). Proxies `/api/*` to the backend; serves EJS templates for the portfolio content.
 - `portfolio/README.md` — local build and verification recipe.
 

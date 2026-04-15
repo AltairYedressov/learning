@@ -4,7 +4,7 @@ Two services live under this tree:
 
 | Service        | Path                         | Port | Image tag suggestion |
 |----------------|------------------------------|------|----------------------|
-| portfolio-api  | `app/portfolio/backend/`     | 5000 | `portfolio-api:dev`  |
+| portfolio-api  | `app/portfolio/api/`     | 5000 | `portfolio-api:dev`  |
 | portfolio-web  | `app/portfolio/frontend/`    | 3000 | `portfolio-web:dev`  |
 
 ## 1. Build
@@ -12,7 +12,7 @@ Two services live under this tree:
 From repo root:
 
 ```bash
-docker build -t portfolio-api:dev app/portfolio/backend
+docker build -t portfolio-api:dev app/portfolio/api
 docker build -t portfolio-web:dev app/portfolio/frontend
 ```
 
