@@ -54,7 +54,13 @@
   3. CORS on the backend is locked to `https://yedressov.com` (plus localhost for dev), and a NetworkPolicy or Istio AuthorizationPolicy restricts backend ingress to the frontend pod and ingress gateway.
   4. The Istio VirtualService bound to the existing `yedressov.com` Gateway sends `/api/*` to `portfolio-api:5000` and everything else to `portfolio-web:3000`.
   5. Flux reconciles the updated `clusters/dev-projectx/portfolio.yaml`, old FastAPI/EJS Deployments and Services are removed from the chart, and only the new workloads are rendered.
-**Plans**: TBD
+**Plans**: 6 plans
+- [ ] 03-01-PLAN.md — Chart values.yaml + backend template (port 5000, /health, envFrom portfolio-smtp, explicit env, SAs)
+- [ ] 03-02-PLAN.md — Chart frontend template rename portfolio-frontend→portfolio-web (port 3000, /health, env, SA)
+- [ ] 03-03-PLAN.md — portfolio/base rewrite (HelmRelease values, VirtualService, NetworkPolicy rename+5000, new AuthorizationPolicy)
+- [ ] 03-04-PLAN.md — Chart publish workflow (helm lint/package/push to OCI ECR on HelmCharts/portfolio/** changes)
+- [ ] 03-05-PLAN.md — Old-app source retirement (git rm app/backend + app/frontend, README update)
+- [ ] 03-06-PLAN.md — Chart.yaml 0.2.0 bump, HelmRelease pin decision, live cutover checkpoint
 
 ### Phase 4: Production Verification & Cutover Close-Out
 **Goal**: The live site at `https://yedressov.com` serves the new portfolio, the contact form delivers real email, and all security guardrails are observable in production.
@@ -74,5 +80,5 @@
 |-------|----------------|--------|-----------|
 | 1. Package & Local Verify | 0/? | Not started | - |
 | 2. Secrets & CI Image Push | 0/5 | Not started | - |
-| 3. Chart, GitOps Deploy & Old-App Retirement | 0/? | Not started | - |
+| 3. Chart, GitOps Deploy & Old-App Retirement | 0/6 | Not started | - |
 | 4. Production Verification & Cutover Close-Out | 0/? | Not started | - |
