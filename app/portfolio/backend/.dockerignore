@@ -1,0 +1,36 @@
+# VCS
+.git
+.gitignore
+
+# Python artifacts
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.mypy_cache
+.ruff_cache
+venv/
+.venv/
+
+# Env / secrets
+.env
+.env.*
+
+# Tests & dev artifacts
+tests/
+test_*.py
+
+# Repo-level noise that must never land in a service image
+.planning/
+terraform-infra/
+clusters/
+platform-tools/
+HelmCharts/
+.github/
+*.md
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
