@@ -23,6 +23,9 @@ spec:
           image: {{ .Values.images.api }}
           ports:
             - containerPort: {{ .Values.ports.api }}
+          envFrom:
+            - secretRef:
+                name: portfolio-smtp
           resources:
             requests:
               cpu: {{ .Values.resources.api.requests.cpu }}
