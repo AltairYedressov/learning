@@ -3,7 +3,7 @@
  * Serves static assets and proxies /api/* requests to the Python backend.
  */
 
-require("dotenv").config();
+try { require("dotenv").config(); } catch (_) { /* dotenv optional in container */ }
 const express = require("express");
 const compression = require("compression");
 const helmet = require("helmet");

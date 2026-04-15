@@ -23,7 +23,7 @@ spec:
 
     images:
       api: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-api:1325274
-      frontend: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-web:1325274-fix2
+      frontend: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-web:1325274-fix3
 
     ports:
       api: 5000
