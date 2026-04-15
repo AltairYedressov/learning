@@ -40,9 +40,12 @@ app.get("/health", (_req, res) => {
 });
 
 // ── API Proxy ───────────────────────────────────────────────────────────────
+// Mount the proxy at root with pathFilter so the original "/api/*" prefix is
+// preserved when forwarded upstream (Express's app.use("/api", ...) would
+// strip it, causing the backend to see "/contact" instead of "/api/contact").
 app.use(
-  "/api",
   createProxyMiddleware({
+    pathFilter: (pathname) => pathname.startsWith("/api"),
     target: BACKEND_URL,
     changeOrigin: true,
     timeout: 10000,
