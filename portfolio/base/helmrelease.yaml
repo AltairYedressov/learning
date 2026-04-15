@@ -8,36 +8,29 @@ spec:
   chart:
     spec:
       chart: portfolio
-      version: "0.2.0"
+      version: "0.1.0"
       sourceRef:
         kind: HelmRepository
         name: ecr-charts
         namespace: flux-system
-  install:
-    remediation:
-      retries: 1
-  upgrade:
-    remediation:
-      retries: 1
-      remediateLastFailure: true
   values:
     namespace:
       name: portfolio
 
     replicas:
       api: 2
-      web: 2
+      frontend: 2
 
     images:
-      api: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-api:283c394
-      web: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-web:283c394
+      api: 372517046622.dkr.ecr.us-east-1.amazonaws.com/images/portfolio-backend:5e83c60
+      frontend: 372517046622.dkr.ecr.us-east-1.amazonaws.com/images/portfolio-frontend:5e83c60
 
     ports:
-      api: 5000
-      web: 3000
+      api: 8000
+      frontend: 3000
 
     api:
-      url: "http://portfolio-api.portfolio.svc.cluster.local:5000"
+      url: "http://portfolio-api.portfolio.svc.cluster.local:8000"
 
     resources:
       api:
@@ -47,7 +40,7 @@ spec:
         limits:
           cpu: 250m
           memory: 256Mi
-      web:
+      frontend:
         requests:
           cpu: 100m
           memory: 128Mi
