@@ -263,26 +263,6 @@ body::before {
 [data-theme="light"] .nav__theme-icon--dark { display: none; }
 [data-theme="light"] .nav__theme-icon--light { display: block; }
 
-/* ── Sound Toggle ────────────────────────────────────────────── */
-.nav__sound {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  cursor: pointer;
-  color: var(--text-muted);
-  transition: all var(--transition);
-  margin-left: 8px;
-}
-.nav__sound:hover { color: var(--accent); border-color: var(--accent); }
-.nav__sound-icon--on { display: none; }
-[data-sound="on"] .nav__sound-icon--on { display: block; }
-[data-sound="on"] .nav__sound-icon--off { display: none; }
-
 /* ── Mobile Menu ─────────────────────────────────────────────── */
 .mobile-menu {
   position: fixed;
