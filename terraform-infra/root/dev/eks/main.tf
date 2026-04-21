@@ -11,19 +11,7 @@ module "eks" {
   flux_path    = "clusters/${var.environment}-${var.cluster_name}"
 }
 
-# -- Branch Protection (CI/CD Security Gate) -----------------------------------------
-
-resource "github_branch_protection_v3" "main" {
-  repository = var.github_repo
-  branch     = "main"
-
-  enforce_admins = false
-
-  required_status_checks {
-    strict = false
-    contexts = [
-      "publish-images",
-      "terraform (iam-roles)",
-    ]
-  }
-}
+# Branch protection intentionally omitted — github_branch_protection_v3
+# requires an organization. This repo lives under a personal GitHub account,
+# so CI must be the enforcement point (PR gating via required workflow runs
+# configured at the repo-settings level).
