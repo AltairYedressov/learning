@@ -29,12 +29,12 @@ variable "min_size" {
 
 variable "max_size" {
   type    = number
-  default = 5
+  default = 1
 }
 
 variable "desired_capacity" {
   type    = number
-  default = 3
+  default = 1
 }
 
 variable "ec2_types" {
