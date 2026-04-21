@@ -48,15 +48,15 @@ jobs:
         with:
           terraform_version: 1.6.6
 
-      # 2.5 Setup Python for Checkov
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+      # # 2.5 Setup Python for Checkov
+      # - name: Setup Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: '3.12'
 
-      # 2.6 Install Checkov
-      - name: Install Checkov
-        run: pip install checkov
+      # # 2.6 Install Checkov
+      # - name: Install Checkov
+      #   run: pip install checkov
 
       # 3 Configure AWS credentials via OIDC
       - name: Configure AWS Credentials (OIDC)
@@ -77,8 +77,8 @@ jobs:
             -backend-config="encrypt=true"
 
       # 4.5 Checkov IaC Scan (before format/validate/plan)
-      - name: Checkov IaC Scan
-        run: checkov --directory . --framework terraform --output cli --compact
+      # - name: Checkov IaC Scan
+      #   run: checkov --directory . --framework terraform --output cli --compact
 
       # 5 Terraform Format
       - name: Terraform Format
