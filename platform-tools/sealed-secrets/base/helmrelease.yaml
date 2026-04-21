@@ -59,17 +59,12 @@ spec:
     keyrenewperiod: "720h"    # 30d  — default is "720h", set explicitly for clarity
     keyttl: "8760h"           # 1y   — how long old keys are retained; tune to your rotation cadence
 
-    # Metrics (Prometheus) — expose on a separate port so it can be scraped
-    # without touching the controller API port
+    # Metrics port stays exposed for potential future scraping, but no
+    # ServiceMonitor — Prometheus/kube-prometheus-stack is not installed.
     metrics:
       port: 8081
       serviceMonitor:
-        enabled: true
-        namespace: monitoring          # namespace where your Prometheus lives
-        interval: 30s
-        scrapeTimeout: 10s
-        labels:
-          release: kube-prometheus-stack   # match your Prometheus serviceMonitorSelector
+        enabled: false
 
     # ── Resources ─────────────────────────────────────────────────────────
     # These are conservative starting values; tune based on observed usage.
