@@ -18,8 +18,8 @@ spec:
       name: portfolio
 
     replicas:
-      api: 2
-      frontend: 2
+      api: 1
+      frontend: 1
 
     images:
       api: 372517046622.dkr.ecr.us-east-1.amazonaws.com/portfolio-api:42476509714ae08c779e1d7190d8842e0dfba1c5
